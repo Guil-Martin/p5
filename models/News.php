@@ -4,7 +4,7 @@ class News
     protected 
     $_id,
     $_author,
-    $_authorID,
+    $_userId,
     $_title,
     $_category,
     $_excerpt,
@@ -30,8 +30,8 @@ class News
 
     // SETTERS ////////////
     public function setId($var)            { $var = (int) $var;     $this->_id = $var; }
+    public function setUserId($var)        { $var = (int) $var;     $this->_userId = $var; }
     public function setAuthor($var)        { $var = (string) $var;  $this->_author = $var; }
-    public function setAuthorID($var)      { $var = (string) $var;  $this->_authorID = $var; }
     public function setNewsTitle($var)     { $var = (string) $var;  $this->_title = $var; }
     public function setCategory($var)      { $var = (string) $var;  $this->_category = $var; }
     public function setExcerpt($var)       { $var = (string) $var;  $this->_excerpt = $var; }
@@ -45,8 +45,8 @@ class News
 
     // GETTERS ////////////
     public function getId()                { return $this->_id; }
+    public function getUserId()            { return $this->_userId; }
     public function getAuthor()            { return $this->_author; }
-    public function getAuthorID()          { return $this->_authorID; }
     public function getNewsTitle()         { return $this->_title; }
     public function getCategory()          { return $this->_category; }
     public function getExcerpt()           { return $this->_excerpt; }
