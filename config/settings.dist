@@ -25,5 +25,5 @@ define('ADB_PASS', '');
 
 //// Check connection
 session_start();
-define('CONNECTED', isset($_SESSION['']) && isset($_SESSION['']) && isset($_SESSION['']));
+define('CONNECTED', isset($_SESSION['userContentId']) && isset($_SESSION['userId']) && isset($_SESSION['userName']));
 ////
