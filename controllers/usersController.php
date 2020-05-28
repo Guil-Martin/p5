@@ -386,14 +386,12 @@ class usersController extends Controller
                     if (!empty($user))
                     {
                         $newsManager = new NewsManager();
-                        // Creates a news object to add it to the db
-                        $news = new News($formD);
 
                         // Fill missing info about the user, author of this news
-                        $news->setAuthorID($user->getId());
-                        $news->setAuthor($user->getUserName());
-
-                        var_dump($news);
+                        $formD['userId'] = $user->getId();
+                        $formD['author'] = $user->getUserName();
+                        // Creates a news object to add it to the db
+                        $news = new News($formD);
 
                         if ($newsManager->createNews($news))
                         { // Should succeed if userId valid
@@ -412,8 +410,6 @@ class usersController extends Controller
 
             }
         }
-        
-        
         
         $this->set($d);
         $this->render("createNews", true);
@@ -460,36 +456,103 @@ class usersController extends Controller
         $this->set($d);
         $this->render("news", true);
     }
-    function newsSingle(...$data)
+    function newsSingle(...$ids)
     { // AJAX
         require_once(ROOT . 'Models/UserManager.php');
+        require_once(ROOT . 'Models/NewsManager.php');
         require_once(ROOT . 'Models/User.php');
         require_once(ROOT . 'Models/News.php');
+        require_once(ROOT . 'Models/Comment.php');
 
         $d = [];
 
-        /*
-        if (!empty($data[0]))
-        { // User ID parameter went trough
+        if (!empty($ids[0]))
+        { // News ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $ids[0] = (int) $ids[0];
 
-            // Get user data if found
             $userManager = new UserManager();
-            $user = $userManager->getUserInfoBy($data[0], 'Id');
+            $newsManager = new NewsManager();
+            $news = $newsManager->getNewsContent($ids[0]);
 
-            if (!empty($user))
-            { // User data found and ready
-                $news = $userManager->getNews($user->getId());
-                if (!empty($news)) 
-                { // User data found and ready
-                    $d['News'] = $news;
+            if (!empty($news)) 
+            {
+                $news = $news[0];
+
+                // Get author user data
+                $author = $userManager->getUserInfoBy($news->getUserId(), 'id');
+                
+                if (!empty($author))
+                { // Author data found
+                    $d['Author'] = $author;
+                    $d['News'] = $news;                    
+
+                    if (CONNECTED) 
+                    { // Get user data if connected
+
+                        $d['Owner'] = $this->isUserPageOwner($author->getContentId());
+
+                        $user = $userManager->getUserInfoBy($_SESSION['userId'], 'id');
+                        if (!empty($user))
+                        {
+                            $d['User'] = $user;
+        
+                            ///// Form comment
+                            if (isset($_POST['msgContent']))
+                            {  
+                                $formD = [];
+                                $errors = []; 
+
+                                $formD = $this->secure_form($_POST);
+                                $formD['commentContent'] = $_POST['msgContent'];
+
+                                if (empty($formD['commentContent']))
+                                { // message content is empty
+                                    $errors['commentContentLen'] = 'Veuillez renseigner un contenu';
+                                } 
+                                else 
+                                {
+                                    $contentLen = strlen($formD['commentContent']);
+                                    if ($contentLen > 500)
+                                    { // message content too long, less than 30 characters
+                                        $errors['commentContentLen'] = 'Le contenu du message est trop long, moins de 500 caractères sont requis.'; 
+                                    } 
+                                }
+
+                                if (empty($errors)) 
+                                { // If everything is good, post news
+
+                                    $formD['newsId'] = $news->getId();
+                                    $formD['userName'] = $user->getUserName();
+                                    $comment = new Comment($formD);
+
+                                    var_dump($comment);
+
+                                    if ($newsManager->createComment($comment))
+                                    { // Should succeed if userId valid
+            
+                                    }
+                                }
+
+                                $d['Data'] = $formD;
+                                $d['Errors'] = $errors;
+
+                            }
+                            /////        
+                        }
+                    }
+
+                    $comments = $newsManager->getComments($ids[0]);
+                    if (!empty($comments)) 
+                    {
+                        $d['Comments'] = $comments;
+                    }
+
                 }
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user->getContentId());
             }
         }
-        */
+
+        //var_dump($d);
 
         $this->set($d);
         $this->render("newsSingle", true);
