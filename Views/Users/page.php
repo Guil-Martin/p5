@@ -33,15 +33,15 @@ if (!empty($User))
             </button>
         </div>
 
-        <div class="container collapse" id="modTools">
+        <div class="container collapse bg-secondary" id="modTools">
             <div class="row">
-                <button id="create_news" class="col-sm-3 btn btn-primary m-1"
+                <button class="postContent col-sm-3 btn btn-primary"
                 cont="<?php echo WEBROOT . 'users/createNews/' . $User->getId() ?>" type="button">Ajouter une nouvelle</button>
 
-                <button id="create_image" class="col-sm-3 btn btn-primary m-1"
+                <button class="postContent col-sm-3 btn btn-primary"
                 cont="<?php echo WEBROOT . 'users/createImage/' . $User->getId() ?>" type="button" data-toggle="modal" data-target=".bd-example-modal-lg" >Ajouter une image</button>
 
-                <a href="<?php echo WEBROOT . 'users/logout'?>" class="col-sm-3 offset-sm-3 btn btn-danger m-1">Déconnexion</a>
+                <a href="<?php echo WEBROOT . 'users/logout'?>" class="col-sm-3 offset-sm-3 btn btn-danger">Déconnexion</a>
             </div>
         </div>
 
@@ -56,27 +56,25 @@ if (!empty($User))
         <ul class="nav nav-tabs col" id="myTab" role="tablist">
 
             <li class="nav-item">
-                <a class="nav-link active" 
+                <a class="userPageTabs nav-link active" 
                 cont="<?php echo WEBROOT . 'users/gallery/' . $User->getId() ?>" 
-                id="gallery-tab" 
                 data-toggle="tab" 
                 href="#content"
                 role="tab" 
                 aria-controls="content" 
                 aria-selected="true">
                 <svg class="bi bi-images pr-1" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M12.002 4h-10a1 1 0 00-1 1v8a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1zm-10-1a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-10z" clip-rule="evenodd"/>
-                        <path d="M10.648 8.646a.5.5 0 01.577-.093l1.777 1.947V14h-12v-1l2.646-2.354a.5.5 0 01.63-.062l2.66 1.773 3.71-3.71z"/>
-                        <path fill-rule="evenodd" d="M4.502 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM4 2h10a1 1 0 011 1v8a1 1 0 01-1 1v1a2 2 0 002-2V3a2 2 0 00-2-2H4a2 2 0 00-2 2h1a1 1 0 011-1z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd" d="M12.002 4h-10a1 1 0 00-1 1v8a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1zm-10-1a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-10z" clip-rule="evenodd"/>
+                    <path d="M10.648 8.646a.5.5 0 01.577-.093l1.777 1.947V14h-12v-1l2.646-2.354a.5.5 0 01.63-.062l2.66 1.773 3.71-3.71z"/>
+                    <path fill-rule="evenodd" d="M4.502 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM4 2h10a1 1 0 011 1v8a1 1 0 01-1 1v1a2 2 0 002-2V3a2 2 0 00-2-2H4a2 2 0 00-2 2h1a1 1 0 011-1z" clip-rule="evenodd"/>
                 </svg>
                 Gallery
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" 
+                <a class="userPageTabs nav-link" 
                 cont="<?php echo WEBROOT . 'users/news/' . $User->getId() ?>" 
-                id="news-tab" 
                 data-toggle="tab"
                 href="#content" 
                 role="tab" 
@@ -92,9 +90,8 @@ if (!empty($User))
             </li>
 
             <li class="nav-item">
-                <a class="nav-link"
+                <a class="userPageTabs nav-link"
                 cont="<?php echo WEBROOT . 'users/about/' . $User->getId() ?>" 
-                id="about-tab" 
                 data-toggle="tab" 
                 href="#content" 
                 role="tab" 
@@ -110,7 +107,8 @@ if (!empty($User))
         </ul>
 
         <div class="tab-content" id="myTabContent">
-            <div class="tab-pane show " id="content" role="tabpanel" aria-labelledby="content">
+            <div class="container-fluid border-secondary border-top-0 tab-pane" id="content" role="tabpanel" aria-labelledby="content">
+
             
             </div>
         </div>
