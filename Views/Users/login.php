@@ -1,3 +1,7 @@
+<?php 
+if (!CONNECTED) {
+?>
+
 <h2 class="text-center">Connexion</h2>
 <p class="text-center">
 <?php
@@ -42,3 +46,7 @@ $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']) || !empt
    
     <button type="submit" class="btn btn-primary ">Valider</button>
 </form>
+
+<?php 
+}
+?>

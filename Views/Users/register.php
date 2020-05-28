@@ -1,3 +1,7 @@
+<?php 
+if (!CONNECTED) {
+?>
+
 <h2 class="text-center">S'enregistrer</h2>
 <p class="text-center">
 <?php
@@ -82,3 +86,7 @@ $mailError = !empty($Errors['mailEmpty']) || !empty($Errors['emailExisting']);
    
     <button type="submit" class="btn btn-primary ">Valider</button>
 </form>
+
+<?php 
+}
+?>
