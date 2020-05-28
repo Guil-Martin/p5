@@ -6,18 +6,18 @@ class NewsManager extends Model
     public function createNews($news)       
     { // Creates a news on the article
         $sql = "INSERT INTO " . DB_NEWS . "
-        (userid, author, newstitle, newscontent, datePosted)
+        (userId, author, newsTitle, newsContent, datePosted)
         VALUES 
-        (:userid, :author, :newstitle, :newscontent, NOW())";
+        (:userId, :author, :newsTitle, :newsContent, NOW())";
         //WHERE EXISTS
         //(SELECT id FROM " . DB_USERS . " WHERE userId = ". $news->getAuthorId();
 
         $req = Database::getBdd()->prepare($sql);
         
-        $req->bindValue(':userid', $news->getAuthorId(), PDO::PARAM_INT);
+        $req->bindValue(':userId', $news->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':author', $news->getAuthor(), PDO::PARAM_STR);
-        $req->bindValue(':newstitle', $news->getNewsTitle(), PDO::PARAM_STR);
-        $req->bindValue(':newscontent', $news->getNewsContent(), PDO::PARAM_STR);       
+        $req->bindValue(':newsTitle', $news->getNewsTitle(), PDO::PARAM_STR);
+        $req->bindValue(':newsContent', $news->getNewsContent(), PDO::PARAM_STR);       
 
         return $req->execute();
     }
@@ -40,12 +40,11 @@ class NewsManager extends Model
         }
         return $news;
     }
-    public function getNewsContent($userId, $newsId)
+    public function getNewsContent($newsId)
     { // Displays single image content
-        $sql = "SELECT * FROM news WHERE (userId = " . $userId . " AND newsId = " . $newsId . ")";
-
+        $sql = "SELECT * FROM news WHERE id = :id";
         $req = Database::getBdd()->prepare($sql);
-
+        $req->bindValue(':id', $newsId, PDO::PARAM_INT);
         $req->execute();
 
         $news = [];
@@ -65,31 +64,40 @@ class NewsManager extends Model
         return (int) $req->fetch(PDO::FETCH_ASSOC);
     }
     ///////
+    /////// COMMENTS
+    public function createComment($comment)       
+    { // Creates a news on the article
+        $sql = "INSERT INTO " . DB_COMMENTS_NEWS . "
+        (newsId, userName, commentContent, datePosted)
+        VALUES 
+        (:newsId, :userName, :commentContent, NOW())";
 
-
-
-
-
-
-
-
-
-
-
-    public function showAllNews()
-    {
-        $sql = "SELECT * FROM news ORDER BY datePosted DESC";
         $req = Database::getBdd()->prepare($sql);
+        
+        $req->bindValue(':newsId', $comment->getNewsId(), PDO::PARAM_INT);
+        $req->bindValue(':userName', $comment->getUserName(), PDO::PARAM_STR);
+        $req->bindValue(':commentContent', $comment->getCommentContent(), PDO::PARAM_STR);    
+
+        return $req->execute();
+    }
+    public function getComments($newsId)
+    { // Returns comments on the article
+        $sql = "SELECT * FROM ". DB_COMMENTS_NEWS . " WHERE newsId = :newsId ORDER BY datePosted DESC";
+        $req = Database::getBdd()->prepare($sql);
+
+        $req->bindValue(':newsId', $newsId, PDO::PARAM_INT);
+
         $req->execute();
 
-        $news = [];
+        $comments = [];
         while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
-        { 
-            $news[] = new News($data); 
+        {   
+            $comments[] = new Comment($data);
         }
-    
-        return (!empty($news)) ? $news : null;
+
+        return (!empty($comments)) ? $comments : null; 
     }
+    ///////
 
     public function getCategoryList() {
         $tags = [];
@@ -132,23 +140,6 @@ class NewsManager extends Model
     ///////
 
     /////// COMMENTS
-    public function showComments($ID)
-    { // Returns comments on the article
-        $sql = "SELECT * FROM comments WHERE newsID = ? ORDER BY datePosted DESC";
-        $req = Database::getBdd()->prepare($sql);
-
-        $req->execute([$ID]);
-        //$arr = $req->errorInfo(); print_r($arr);
-
-        $comments = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
-        {   
-            $comments[] = new Comment($data);
-        }
-
-        return (!empty($comments)) ? $comments : null; 
-    }
-
     public function countComments($ID)
     { // Returns the total number of comments for this article
         $sql = "SELECT COUNT(*) as total FROM comments WHERE ID = :id";
@@ -162,40 +153,5 @@ class NewsManager extends Model
 
         return (int) $data['total']; 
     }
-
-    public function createComment($data)       
-    { // Creates a comment on the article
-
-        // Creates a comment object to add it to the db
-        $comment = new Comment($data);
-
-        $sql = "INSERT INTO comments
-        (author, content, newsID, datePosted)
-        VALUES
-        (:author, :content, :newsID, NOW())";
-
-        $req = Database::getBdd()->prepare($sql);
-        
-        $req->bindValue(':author', $comment->getAuthor());
-        $req->bindValue(':content', $comment->getContent());
-        $req->bindValue(':newsID', $comment->getNewsID());
-
-        $req->execute();
-
-        // set id
-        $comment->setID(Database::getBdd()->lastInsertId());
-    }
-
-    public function addReportOnComment($data)       
-    { // Adds a report to the total of report on the comment
-
-        $ID = (int) $data[0];
-        $newsID = (int) $data[1];
-
-        $sql =  "UPDATE comments SET reports = reports + 1 WHERE ID = ? AND newsID = ?";
-        $req = Database::getBdd()->prepare($sql);
-        return $req->execute([$ID, $newsID]);
-    }
-    ///////
 
 }
