@@ -24,24 +24,23 @@
     */
 
     // User page content tabs
-    $("#news-tab").on("click", (e) => { userPageTabs(e) })
-    $("#gallery-tab").on("click", (e) => { userPageTabs(e) })
-    $("#about-tab").on("click", (e) => { userPageTabs(e) })
+    $(".userPageTabs").on("click", (e) => { userPageTabs(e) })
 
     function userPageTabs(e) {
+        e.preventDefault();
         let tab = $(e.target);
         let cont = tab.attr('cont');
         $.ajax ({ 
             url: cont,
             data: {action: ''},
             type: 'POST',
-            success: (output) => {
+            success: (output) => {                
+
                 $("#content").html(output);
 
-                tab.tab('show');
+               // tab.tab('show');
                 
-                $("#news_single").on("click", (e) => { modalContent(e) })
-                $("#image_single").on("click", (e) => { modalContent(e) })
+                $(".content_single").on("click", (e) => { modalContent(e) })
             },
             error: (xhr, ajaxOptions, thrownError) => {
                 console.log(thrownError)
@@ -49,21 +48,12 @@
         });
     }
 
-
-    // Explore content buttons
-    $("#create_news").on("click", (e) => { modalContent(e) })
-    $("#create_image").on("click", (e) => { modalContent(e) })
-
-
+    // Modal content
+    $(".postContent").on("click", (e) => { modalContent(e) })
 
     function modalContent(e, values = []) {
         let tar = $(e.target);
         let cont = tar.attr('cont');
-
-        console.log(tar)
-        console.log(cont)
-        console.log(values)
-        
         $.ajax ({ 
             url: cont,
             //dataType: "json",
