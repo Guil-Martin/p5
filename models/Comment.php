@@ -3,8 +3,8 @@ class Comment
 {
     protected
     $_id,
-    $_newsID,
-    $_author,
+    $_newsId,
+    $_userName,
     $_content,
     $_datePosted,
     $_likes,
@@ -25,9 +25,9 @@ class Comment
 
     // SETTERS ////////////
     public function setId($var)            { $var = (int) $var; $this->_id = $var; }
-    public function setNewsID($var)        { $var = (int) $var; $this->_newsID = $var; }
-    public function setAuthor($var)        { $var = (string) $var;  $this->_author = $var; }
-    public function setContent($var)       { $var = (string) $var;  $this->_content = $var; }
+    public function setNewsId($var)        { $var = (int) $var; $this->_newsId = $var; }
+    public function setUserName($var)      { $var = (string) $var;  $this->_userName = $var; }
+    public function setCommentContent($var){ $var = (string) $var;  $this->_content = $var; }
     public function setDatePosted($var)    { $this->_datePosted = $var; }
     public function setLikes($var)         { $var = (int) $var; $this->_likes = $var; }
     public function setReports($var)       { $var = (int) $var; $this->_reports = $var; }
@@ -35,9 +35,9 @@ class Comment
 
     // GETTERS ////////////
     public function getId()                { return $this->_id; }
-    public function getNewsID()            { return $this->_newsID; }
-    public function getAuthor()            { return $this->_author; }
-    public function getContent()           { return $this->_content; }
+    public function getNewsID()            { return $this->_newsId; }
+    public function getUserName()          { return $this->_userName; }
+    public function getCommentContent()    { return $this->_content; }
     public function getDatePosted()        { return $this->_datePosted; }
     public function getLikes()             { return $this->_likes; }
     public function getReports()           { return $this->_reports; }
