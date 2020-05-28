@@ -1,0 +1,29 @@
+<?php
+
+//// DB Names
+define('DB_NEWS', 'news');
+define('DB_IMG', 'images');
+define('DB_COMMENTS_NEWS', 'comments_news');
+define('DB_COMMENTS_IMG', 'comments_images');
+define('DB_USERS', 'users');
+////
+
+//// General settings
+define('NEWS_PER_PAGE', 10);
+define('IMAGES_PER_PAGE', 10);
+
+define('NEWS_IMAGE_W', 1280);
+define('NEWS_IMAGE_H', 853);
+////
+
+//// DB -- Dist changes
+define('ADB_HOST', '');
+define('ADB_NAME', '');
+define('ADB_USER', '');
+define('ADB_PASS', '');
+//// -- Dist changes
+
+//// Check connection
+session_start();
+define('CONNECTED', isset($_SESSION['userContentId']) && isset($_SESSION['userId']) && isset($_SESSION['userName']));
+////
