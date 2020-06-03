@@ -2,9 +2,13 @@
 
 //// DB Names
 define('DB_NEWS', 'news');
+define('DB_NEWS_LIKES', 'news_likes');
 define('DB_IMG', 'images');
+define('DB_IMG_LIKES', 'image_likes');
 define('DB_COMMENTS_NEWS', 'comments_news');
-define('DB_COMMENTS_IMG', 'comments_images');
+define('DB_COMMENTS_NEWS_LIKES', 'comments_news_likes');
+define('DB_COMMENTS_IMG', 'comments_image');
+define('DB_COMMENTS_IMG_LIKES', 'comments_image_likes');
 define('DB_USERS', 'users');
 ////
 
@@ -12,8 +16,8 @@ define('DB_USERS', 'users');
 define('NEWS_PER_PAGE', 10);
 define('IMAGES_PER_PAGE', 10);
 
-define('NEWS_IMAGE_W', 1280);
-define('NEWS_IMAGE_H', 853);
+define('IMAGE_W', 1920);
+define('IMAGE_H', 1080);
 ////
 
 //// DB -- Dist changes
