@@ -8,8 +8,10 @@ class homeController extends Controller
         $d = [];
 
 
-        // Display last members entries
 
+
+
+        
 
         $this->set($d);
         $this->render("index");
