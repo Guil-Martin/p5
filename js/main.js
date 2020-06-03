@@ -1,87 +1,164 @@
 ;(function () {
-    
-    
-    /*
-	$(".reportBtn").on("click", (e) => {
-		let tar = $(e.target);
-		let comID = tar.attr('comID');
-		let newsID = tar.attr('comNewsID');
-		let Url = '/phpBlog/news/report/' + comID + '/' + newsID;
-	
-		$.ajax({ url: Url,
-			data: {action: 'test'},
-			type: 'post',
-			success: function(output) {
-				tar.prop("disabled", true);
-				tar.removeClass("btn-danger").addClass("btn-warning");
-			}
-		});
-    })
-
-    let validate = confirm("Voulez-vous vraiment supprimer cet article ?");
-    if (validate) {
-    }
-    */
 
     // User page content tabs
     $(".userPageTabs").on("click", (e) => { userPageTabs(e) })
+    $( "#Gallery" ).trigger( "click" );
 
     function userPageTabs(e) {
-        e.preventDefault();
         let tab = $(e.target);
         let cont = tab.attr('cont');
-        $.ajax ({ 
-            url: cont,
-            data: {action: ''},
-            type: 'POST',
-            success: (output) => {                
+        if (!cont) {
+            tab = tab.parent();
+            cont = tab.attr('cont');
+        }
+        if (cont) {
+            tab.siblings().removeClass('active')
+            tab.addClass("active");
 
-                $("#content").html(output);
-
-               // tab.tab('show');
-                
-                $(".content_single").on("click", (e) => { modalContent(e) })
-            },
-            error: (xhr, ajaxOptions, thrownError) => {
-                console.log(thrownError)
-            }
-        });
+            $.ajax ({ 
+                url: cont,
+                async: true,
+                success: (output) => {
+                    $(".userPageContent").html(output);              
+                    $(".content_single").on("click", (e) => { e.stopPropagation(); modalContent(e) })
+                },
+                error: (xhr, ajaxOptions, thrownError) => {
+                    console.log(thrownError)
+                }
+            });
+        }
     }
 
     // Modal content
-    $(".postContent").on("click", (e) => { modalContent(e) })
+    $(".postContent").on("click", (e) => {e.stopPropagation(); modalContent(e) })
 
     function modalContent(e, values = []) {
         let tar = $(e.target);
         let cont = tar.attr('cont');
-        $.ajax ({ 
-            url: cont,
-            //dataType: "json",
-            data: values,
-            type: 'POST',
-            success: (output) => {
-               // alert(output)
-                let modal = $(".modal");
-                let modalBody = $(".modal-body");
-                modalBody.html(output);
 
-                if (!modal.hasClass('show')) {
-                    modal.modal('toggle');
-                }
-                
-                let validateForm = $('#validateForm')
-                if (validateForm != null) {
-                    validateForm.submit((e) => {
-                        e.preventDefault();
-                        modalContent(e, validateForm.serializeArray())
-                    });
-                }
+        //console.log(values);
+        console.log(values);
+        if (values[1]) {
+            console.log('values[1] - ' + values[1].value);
+            console.log($("#content"));
 
-            },
-            error: (xhr, ajaxOptions, error) => {
-                console.log(error)
-            }
-        });
+            //var value = $("#content").getBody().html();
+            //console.log('value - ' + value);
+
+        }
+
+        if (!cont) {
+            tar = tar.parent();
+            cont = tar.attr('cont');
+        }
+        if (cont) {
+            $.ajax ({ 
+                url: cont,
+                data: values,
+                processData: false,
+                contentType: false,
+                type: 'POST',
+                success: (output) => {
+                   // alert(output)
+                    let modal = $(".modal");
+                    let modalBody = $(".modal-body");
+                    modalBody.html(output);
+    
+                    if (!modal.hasClass('show')) {
+                        modal.modal('toggle');
+                    }
+                    
+                    let validateForm = $('#validateForm')
+                    if (validateForm != null) {
+                        validateForm.submit((e) => {
+                            e.preventDefault();
+                            let formData = new FormData();
+                            console.log(formData);
+                            /*
+                            let textArea = $("#content");
+                            textArea[0].sceditor('instance').updateOriginal();
+                            */
+                           
+                            /*
+                            var textArea = $("#content").sceditor('instance');
+                            var value = textArea.getBody().html();
+                            console.log(validateForm);
+                            */
+                            let form_data = validateForm.serializeArray();
+                            $.each(form_data, function (key, input) {
+                                formData.append(input.name, input.value);
+                            });
+                            
+                            //File data
+                            let file_data = $('input[name="image"]')[0].files;
+                            for (let i = 0; i < file_data.length; i++) {
+                                formData.append("image[]", file_data[i]);
+                            }
+
+                            modalContent(e, formData)
+                        });
+                        /*
+                        let textArea = $("#content");
+                        if (textArea) {
+                            sceditor.create(textArea[0], {
+                                format: 'bbcode',
+                                style: 'minified/themes/content/modern.min.css',
+                                toolbarExclude: 'emoticon',
+                                emoticonsEnabled: false
+                                //emoticonsRoot: 'p5/images/emoticons/',
+                            });
+                        }
+                        */
+                    }
+    
+                    // Valid success
+                    $(".postSuccess").on("click", (e) => { postSuccess(e) })
+
+                    // Likes
+                    $(".like").on("click", (e) => { like(e) })
+    
+                },
+                error: (xhr, ajaxOptions, error) => {
+                    console.log(error)
+                }
+            });
+        }
     }
 
+    function postSuccess(e) {
+        let tar = $(e.target);
+        let cont = tar.attr('cont');
+        if (cont) {
+            let modal = $(".modal");
+            if (modal.hasClass('show')) {
+                modal.modal('toggle');
+            }
+            $( "#"+cont ).trigger( "click" );
+        }
+    }
+    
+    function like(e) {
+        let tar = $(e.target);
+        let cont = tar.attr('cont');
+        if (!cont) {
+            tar = tar.parent();
+            cont = tar.attr('cont');
+        }
+        if (cont) {
+            $.ajax ({ 
+                url: cont,
+                success: (output) => {
+                    if (tar.hasClass('btn-secondary')) {
+                        tar.removeClass('btn-secondary').addClass('btn-danger')
+                    } else {
+                        tar.removeClass('btn-danger').addClass('btn-secondary')
+                    }                
+                },
+                error: (xhr, ajaxOptions, error) => {
+                    console.log(error)
+                }
+            });
+        }
+    }
+    
 }());
