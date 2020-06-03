@@ -3,7 +3,7 @@ if (!empty($User))
 { // User exists, displays the page
 ?>
 
-<h1 class="text-center p-2">Page de <?php echo $User->getUserName() ?></h1>
+<h1 class="text-center mt-2"><?php echo $User->getUserName() ?></h1>
 
 <?php 
 
@@ -36,10 +36,10 @@ if (!empty($User))
         <div class="container collapse bg-secondary" id="modTools">
             <div class="row">
                 <button class="postContent col-sm-3 btn btn-primary"
-                cont="<?php echo WEBROOT . 'users/createNews/' . $User->getId() ?>" type="button">Ajouter une nouvelle</button>
+                cont="<?php echo WEBROOT . 'news/newsCreate/' . $User->getId() ?>" type="button">Ajouter une nouvelle</button>
 
                 <button class="postContent col-sm-3 btn btn-primary"
-                cont="<?php echo WEBROOT . 'users/createImage/' . $User->getId() ?>" type="button" data-toggle="modal" data-target=".bd-example-modal-lg" >Ajouter une image</button>
+                cont="<?php echo WEBROOT . 'gallery/galleryCreate/' . $User->getId() ?>" type="button" data-toggle="modal" data-target=".bd-example-modal-lg" >Ajouter une image</button>
 
                 <a href="<?php echo WEBROOT . 'users/logout'?>" class="col-sm-3 offset-sm-3 btn btn-danger">Déconnexion</a>
             </div>
@@ -52,67 +52,40 @@ if (!empty($User))
     ?>
 
     <div class="row">
-   
-        <ul class="nav nav-tabs col" id="myTab" role="tablist">
 
-            <li class="nav-item">
-                <a class="userPageTabs nav-link active" 
-                cont="<?php echo WEBROOT . 'users/gallery/' . $User->getId() ?>" 
-                data-toggle="tab" 
-                href="#content"
-                role="tab" 
-                aria-controls="content" 
-                aria-selected="true">
+            <button class="userPageTabs col-sm btn btn-secondary active" cont="<?php echo WEBROOT . 'gallery/gallery/' . $User->getId() ?>" id="Gallery" aria-label="Gallery" title="Gallery">       
                 <svg class="bi bi-images pr-1" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M12.002 4h-10a1 1 0 00-1 1v8a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1zm-10-1a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-10z" clip-rule="evenodd"/>
                     <path d="M10.648 8.646a.5.5 0 01.577-.093l1.777 1.947V14h-12v-1l2.646-2.354a.5.5 0 01.63-.062l2.66 1.773 3.71-3.71z"/>
                     <path fill-rule="evenodd" d="M4.502 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM4 2h10a1 1 0 011 1v8a1 1 0 01-1 1v1a2 2 0 002-2V3a2 2 0 00-2-2H4a2 2 0 00-2 2h1a1 1 0 011-1z" clip-rule="evenodd"/>
                 </svg>
                 Gallery
-                </a>
-            </li>
+            </button>
 
-            <li class="nav-item">
-                <a class="userPageTabs nav-link" 
-                cont="<?php echo WEBROOT . 'users/news/' . $User->getId() ?>" 
-                data-toggle="tab"
-                href="#content" 
-                role="tab" 
-                aria-controls="content" 
-                aria-selected="false">
+            <button class="userPageTabs col-sm btn btn-secondary" cont="<?php echo WEBROOT . 'news/news/' . $User->getId() ?>" id="Nouvelles" aria-label="Nouvelles" title="Nouvelles">
                 <svg class="bi bi-newspaper pr-1" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M0 2A1.5 1.5 0 011.5.5h11A1.5 1.5 0 0114 2v12a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 010 14V2zm1.5-.5A.5.5 0 001 2v12a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V2a.5.5 0 00-.5-.5h-11z" clip-rule="evenodd"/>
                     <path fill-rule="evenodd" d="M15.5 3a.5.5 0 01.5.5V14a1.5 1.5 0 01-1.5 1.5h-3v-1h3a.5.5 0 00.5-.5V3.5a.5.5 0 01.5-.5z" clip-rule="evenodd"/>
                     <path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/>
                 </svg>
                 Nouvelles
-                </a>
-            </li>
+            </button>
 
-            <li class="nav-item">
-                <a class="userPageTabs nav-link"
-                cont="<?php echo WEBROOT . 'users/about/' . $User->getId() ?>" 
-                data-toggle="tab" 
-                href="#content" 
-                role="tab" 
-                aria-controls="content" 
-                aria-selected="false">
+            <button class="userPageTabs col-sm btn btn-secondary" cont="<?php echo WEBROOT . 'about/about/' . $User->getId() ?>" id="Profil" aria-label="Profil" title="Profil">
                 <svg class="bi bi-person-lines-fill pr-1" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 100-6 3 3 0 000 6zm7 1.5a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zm2 9a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
                 </svg>
                 Profil
-                </a>
-            </li>
+            </button>
 
-        </ul>
 
-        <div class="tab-content" id="myTabContent">
-            <div class="container-fluid border-secondary border-top-0 tab-pane" id="content" role="tabpanel" aria-labelledby="content">
 
+    </div>
+
+    <div class="row">
+        <div class="userPageContent container-fluid mt-4">
             
-            </div>
         </div>
-    
     </div>
 
 <?php

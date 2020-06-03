@@ -83,6 +83,11 @@ $mailError = !empty($Errors['mailEmpty']) || !empty($Errors['emailExisting']);
         <?php echo !empty($Errors['mailEmpty']) ? '<div class="invalid-feedback">' . $Errors['mailEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['emailExisting']) ? '<div class="invalid-feedback">' . $Errors['emailExisting'] . '</div>' : '' ?>
     </div>
+
+    <div class="form-group">
+		<label for="avatar" aria-label="Avatar" title="Avatar">Avatar</label>
+		<input type="file" class="form-control-file" name="avatar">
+    </div>
    
     <button type="submit" class="btn btn-primary ">Valider</button>
 </form>
