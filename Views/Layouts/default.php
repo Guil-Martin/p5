@@ -29,6 +29,9 @@
 
 	<link rel="stylesheet" href="<?php echo WEBROOT ?>css/style.css">
 
+	<!-- SCEditor CSS -->
+	<link rel="stylesheet" href="<?php echo WEBROOT ?>Vendor/SCEditor/minified/themes/modern.min.css" />
+	
 	</head>
 	<body>
 
@@ -102,7 +105,7 @@
 						</button>
 					</div>
 
-					<div class="modal-body">
+					<div class="modal-body p-0">
 
 					</div>
 
@@ -124,11 +127,14 @@
 	
 	<!-- jQuery -->
 	<script src="<?php echo WEBROOT ?>js/jquery.min.js"></script>
-	<script src="<?php echo WEBROOT ?>js/jquery.popupoverlay.js"></script>
 	<!-- Bootstrap -->
 	<script src="<?php echo WEBROOT ?>js/bootstrap.min.js"></script>
+	<!-- SCEditor JS -->
+	<script src="<?php echo WEBROOT ?>Vendor/SCEditor/minified/sceditor.min.js"></script>
+	<script src="<?php echo WEBROOT ?>Vendor/SCEditor/minified/formats/bbcode.js"></script>
 	<!-- Main JS -->
 	<script src="<?php echo WEBROOT ?>js/main.js"></script>
+	
 
 	</body>
 </html>
