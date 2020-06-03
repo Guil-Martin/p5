@@ -109,4 +109,98 @@
             return strtolower($str);
         }
 
+        /**
+        * @package       BBCode Parser
+        * @author        ToTamir
+        * @copyright     2018 ToTamir
+        * @license       MIT https://github.com/ToTamir/BBCode-Parser/blob/master/LICENSE
+        * @version       1.0.2
+        * @link          https://github.com/ToTamir/BBCode-Parser
+        */
+
+        /**
+        * @see           Function       ParseBBCode()  Convert BBCode to HTML and returns parsed text as string
+        * @param         String         $string        The string to parse
+        * @return        String                        The parsed string
+        */
+
+        function ParseBBCode(string $string): string
+        {
+            $string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8', true);
+            $string = str_replace(["\r\n", "\n"], "\r", $string);
+            $string = preg_replace_callback(['/\[(ol)\](.*?)\[\/ol\]/', '/\[(ul)\](.*?)\[\/ul\]/', '/\[(table)\](.*?)\[\/table\]/'], function($matches)
+            {
+                return '<'.$matches[1].'>'.preg_replace('/\s+/', ' ',$matches[2]).'</'.$matches[1].'>';
+            }, $string);
+
+            $patterns =
+            [
+                '/\[b\](.*?)\[\/b\]/',
+                '/\[i\](.*?)\[\/i\]/',
+                '/\[u\](.*?)\[\/u\]/',
+                '/\[s\](.*?)\[\/s\]/',
+                '/\[j\](.*?)\[\/j\]/',
+                '/\[font=(.*?)\](.*?)\[\/font\]/',
+                '/\[size=50\](.*?)\[\/size\]/',
+                '/\[size=85\](.*?)\[\/size\]/',
+                '/\[size=100\](.*?)\[\/size\]/',
+                '/\[size=150\](.*?)\[\/size\]/',
+                '/\[size=200\](.*?)\[\/size\]/',
+                '/\[color=(([a-z]+)|(#[0-f]{6}?)|(rgb\(\d{1,3}?\,\d{1,3}?\,\d{1,3}?\)))\](.*?)\[\/color\]/',
+                '/\[center\](.*?)\[\/center\]/',
+                '/\[left\](.*?)\[\/left\]/',
+                '/\[right\](.*?)\[\/right\]/',
+                '/\[quote=(.*?)\](.*?)\[\/quote\]/',
+                '/\[quote\](.*?)\[\/quote\]/',
+                '/\[url=(.*?)\](.*?)\[\/url\]/',
+                '/\[img=(.*?) alt=(.*?)\]/',
+                '/\[img\](.*?)\[\/img\]/',
+                '/\[youtube=(.*?)\]/',
+                '/\[list\](.*?)\[\/list\]/',
+                '/\[list=1\](.*?)\[\/list\]/',
+                '/\[\*\](.*?)\[\/\*\]/',
+                '/\[td\](.*?)\[\/td\]/',
+                '/\[tr\](.*?)\[\/tr\]/',
+                '/\[th\](.*?)\[\/th\]/',
+                '/\[code\](.*?)\[\/code\]/',
+                '/\r/'
+            ];
+
+            $replacements =
+            [
+                '<strong>$1</strong>',
+                '<em>$1</em>',
+                '<span style="text-decoration:underline;">$1</span>',
+                '<del>$1</del>',
+                '<span style="text-align:justify;text-justify:inter-word;">$1</span>',
+                '<span style="font-family:$1;">$2</span>',
+                '<font size="1">$1</font>',
+                '<font size="2">$1</font>',
+                '<font size="3">$1</font>',
+                '<font size="4">$1</font>',
+                '<font size="6">$1</font>',
+                //'<span style="font-size:$1px;">$2</span>',
+                '<span style="color:$1;">$5</span>',
+                '<div style="text-align:center;">$1</div>',
+                '<div style="text-align:left;">$1</div>',
+                '<div style="text-align:right;">$1</div>',
+                '<blockquote><strong>$1:</strong><br>$2</blockquote>',
+                '<blockquote>$1</blockquote>',
+                '<a href="$1">$2</a>',
+                '<img src="$1" alt="$2">',
+                '<img src="$1">',
+                '<iframe src="https://www.youtube-nocookie.com/embed/$1" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+                '<ul>$1</ul>',
+                '<ol>$1</ol>',
+                '<li>$1</li>',
+                '<td>$1</td>',
+                '<tr>$1</tr>',
+                '<th>$1</th>',
+                '<pre><code>$1</code></pre>',
+                '<br>'
+            ];
+
+            return preg_replace($patterns, $replacements, $string);
+        }
+
     }
