@@ -3,7 +3,7 @@ class Comment
 {
     protected
     $_id,
-    $_newsId,
+    $_postId,
     $_userName,
     $_content,
     $_datePosted,
@@ -25,7 +25,7 @@ class Comment
 
     // SETTERS ////////////
     public function setId($var)            { $var = (int) $var; $this->_id = $var; }
-    public function setNewsId($var)        { $var = (int) $var; $this->_newsId = $var; }
+    public function setPostId($var)        { $var = (int) $var; $this->_postId = $var; }
     public function setUserName($var)      { $var = (string) $var;  $this->_userName = $var; }
     public function setCommentContent($var){ $var = (string) $var;  $this->_content = $var; }
     public function setDatePosted($var)    { $this->_datePosted = $var; }
@@ -35,7 +35,7 @@ class Comment
 
     // GETTERS ////////////
     public function getId()                { return $this->_id; }
-    public function getNewsID()            { return $this->_newsId; }
+    public function getPostID()            { return $this->_postId; }
     public function getUserName()          { return $this->_userName; }
     public function getCommentContent()    { return $this->_content; }
     public function getDatePosted()        { return $this->_datePosted; }

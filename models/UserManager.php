@@ -26,7 +26,7 @@ class UserManager extends Model
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':val', $value, PDO::PARAM_STR);
         $req->execute();
-        return $req->fetch();
+        return $req->fetch() ? true : false;
     }
 
     public function getUserInfoBy($data, $by = 'userName')
@@ -42,30 +42,6 @@ class UserManager extends Model
             return $user;
         }  
         return false;
-    }
-    ///////
-
-    /////// GALLERY
-    public function getImages($userId, $offset = 1)
-    { // Return offset number of Image objects
-        $offset = $offset * IMAGES_PER_PAGE;
-
-        $sql = "SELECT * FROM " . DB_IMG . " WHERE userId = :userId ORDER BY datePosted DESC LIMIT :offset";
-        $req = Database::getBdd()->prepare($sql);
-        $req->bindValue(':userId', $userId, PDO::PARAM_INT);
-        $req->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $req->execute();
-
-        $images = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
-        { 
-            $images[] = new Image($data); 
-        }
-        return $images;
-    }
-    public function getImageContent($userId)
-    { // Displays single image content
-
     }
     ///////
 
