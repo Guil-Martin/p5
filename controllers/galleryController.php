@@ -1,5 +1,12 @@
 <?php
 
+require_once(ROOT . 'Models/GalleryManager.php');
+require_once(ROOT . 'Models/Image.php');
+require_once(ROOT . 'Models/UserManager.php');
+require_once(ROOT . 'Models/User.php');
+require_once(ROOT . 'Models/CommentManager.php');
+require_once(ROOT . 'Models/Comment.php');
+
 class galleryController extends Controller
 {
 
@@ -10,149 +17,139 @@ class galleryController extends Controller
         if (!empty($data[0]))
         { // User ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $userId = (int) $data[0];
 
-            if (isset($_POST["title"]))
-            {                
-                $formD = [];
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($userId, 'Id');
 
-                $formD = $this->secure_form($_POST);
-                $errors = [];
+            if (!empty($user))
+            {
 
-                $formD['imgTitle'] = $_POST['title'];
-                $formD['imgContent'] = $_POST['content'];
+                $validUser = $this->isUserPageOwner($user);
+                $d['Owner'] = $validUser;
 
-                if (empty($formD['imgTitle']))
-                { // title is empty
-                    $errors['titleEmpty'] = 'Veuillez renseigner un titre';
-                } 
-                else 
-                {
-                    $titleLen = strlen($formD['imgTitle']);
-                    if ($titleLen > 100)
-                    { // title too long, less than 30 characters
-                        $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
-                    } 
-                }
+                if ($validUser) {
 
-                if (empty($formD['imgContent']))
-                { // content is empty
-                    $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
-                } 
-                else 
-                {
-                }
-
-                //var_dump($_POST);
-                var_dump($_FILES);
-
-                //// IMAGE
-                require_once(ROOT . 'Models/SimpleImage.php');
-                if (empty($_FILES['image']['name'])) {
-                    $errors['imageEmpty'] = 'Veuillez séléctionner une image à uploader'; 
-                }
-                else
-                {
-                    $file = $_FILES["image"]["tmp_name"][0];
-                    $name = basename($_FILES["image"]["name"][0]); // basename() may prevent filesystem traversal attacks;
-                    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                    $d['User'] = $user;
                     
-                    if (!in_array($extension, array('jpg', 'png', 'jpeg', 'gif')))
-                    { // Allow only some formats
-                        $errors['imageFormat'] = "Image - Seuls les formats JPG, JPEG, PNG & GIF sont autorisés."; 
-                    }
-                }
-                ////
+                    if (isset($_POST["postTitle"]))
+                    {                
+                        $formD = [];
 
-                if (empty($errors)) 
-                { // If everything is good, post image
-                    require_once(ROOT . 'Models/GalleryManager.php');
-                    require_once(ROOT . 'Models/UserManager.php');
-                    require_once(ROOT . 'Models/Image.php');                    
-                    require_once(ROOT . 'Models/User.php');
+                        $formD = $_POST;
+                        $errors = [];              
 
-                    $userManager = new UserManager();
-                    $user = $userManager->getUserInfoBy($data[0], 'Id');
+                        $formD['imgTitle'] = $formD['postTitle'];
+                        $formD['imgContent'] = $formD['postContent'];
 
-                    if (!empty($user))
-                    {
-                        if (!empty($file))
-                        { //// IMAGE
-                            $simpleImage = new SimpleImage();
-                            // Creates user folder if doesn't exist
-                            $target_folder = ROOT . "images/gallery/" . $user->getContentId();
-                            if (!is_dir($target_folder))
-                            { mkdir($target_folder); }
-                            
-                            // Rename the image with the title
-                            $rename = $this->removeAccents($formD['imgTitle']);
-                            $rename = $this->urlValidId($rename)  . '.' . $extension;
-                
-                            // Thumbnail
-                            $thumb_folder = $target_folder . '/thumbnails/';
-                            if (!is_dir($thumb_folder)) 
-                            { mkdir($thumb_folder); }
-
-                            $thumb_file = $thumb_folder . '/' . $rename;
-                           
-                            $simpleImage->load($file);
-                            if ($simpleImage->getWidth() > 300) {
-                                $simpleImage->resizeToWidth(300);
-                            }
-                            if ($simpleImage->getHeight() > 300) {
-                                $simpleImage->resizeToHeight(300);
-                            }
-                            
-                            $simpleImage->save($thumb_file);
-                            $formD['ImgThumbnail'] = $user->getContentId() . '/thumbnails/' . $rename;
-
-                            // Main image
-                            $target_file = $target_folder . '/' . $rename;
-
-                            $simpleImage->load($file);
-                            if ($simpleImage->getWidth() > 1920) {
-                                $simpleImage->resizeToWidth(1920);
-                            }
-                            if ($simpleImage->getHeight() > 1080) {
-                                $simpleImage->resizeToHeight(1080);
-                            }
-
-                            $simpleImage->save($target_file);
-                            $formD['imgPath'] = $user->getContentId() . '/' . $rename;
+                        if (empty($formD['imgTitle']))
+                        { // title is empty
+                            $errors['titleEmpty'] = 'Veuillez renseigner un titre';
+                        } 
+                        else 
+                        {
+                            $titleLen = strlen($formD['imgTitle']);
+                            if ($titleLen > 100)
+                            { // title too long, less than 30 characters
+                                $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
+                            } 
                         }
 
-                        $galleryManager = new GalleryManager();
+                        if (empty($formD['imgContent']))
+                        { // content is empty
+                            $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
+                        } 
+                        else 
+                        {
+                        }
 
-                        // Fill missing info about the user, author of this image
-                        $formD['userId'] = $user->getId();
-                        $formD['author'] = $user->getUserName();
-
-                        // Creates an image object to add it to the db
-                        $image = new Image($formD);
-
-                        var_dump($image);
-
-                        if ($galleryManager->galleryCreate($image))
-                        { // Should succeed if userId valid
-                            $d['Success'] = 'Image postée avec succès';
+                        //// IMAGE
+                        require_once(ROOT . 'Models/SimpleImage.php');
+                        if (empty($_FILES['fileUpload']['name'])) {
+                            $errors['imageEmpty'] = 'Veuillez séléctionner une image à uploader'; 
                         }
                         else
-                        { // Creation failed, delete uploaded image
-                            if (!empty($file))
-                            {
-                                unlink($target_file);
-                                unlink($thumb_file);
+                        {
+                            $file = $_FILES["fileUpload"]["tmp_name"][0];
+                            $name = basename($_FILES["fileUpload"]["name"][0]); // basename() may prevent filesystem traversal attacks;
+                            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                            
+                            if (!in_array($extension, array('jpg', 'png', 'jpeg', 'gif')))
+                            { // Allow only some formats
+                                $errors['imageFormat'] = "Image - Seuls les formats JPG, JPEG, PNG & GIF sont autorisés."; 
                             }
                         }
+                        ////
+
+                        if (empty($errors)) 
+                        { // If everything is good, post image
+
+                            if (!empty($file))
+                            { //// IMAGE
+                                $imageThumb = new SimpleImage();
+                                // Creates user folder if doesn't exist
+                                $target_folder = ROOT . "images/gallery/" . $user->getContentId();
+                                if (!is_dir($target_folder))
+                                { mkdir($target_folder); }
+                                
+                                // Rename the image with the title
+                                $rename = $this->removeAccents($formD['imgTitle']);
+                                $rename = $this->urlValidId($rename)  . '.' . $extension;
+
+                                // Thumbnail
+                                $thumb_folder = $target_folder . '/thumbnails/';
+                                if (!is_dir($thumb_folder)) 
+                                { mkdir($thumb_folder); }
+
+                                $thumb_file = $thumb_folder . '/' . $rename;
+                            
+                                $imageThumb->load($file);
+                                if ($imageThumb->getWidth() > 300) {
+                                    $imageThumb->resizeToWidth(300);
+                                }
+                                if ($imageThumb->getHeight() > 300) {
+                                    $imageThumb->resizeToHeight(300);
+                                }
+                                
+                                $formD['ImgThumbnail'] = $user->getContentId() . '/thumbnails/' . $rename;
+
+                                // Main image
+                                $imageMain = new SimpleImage();
+                                $target_file = $target_folder . '/' . $rename;
+
+                                $imageMain->load($file);
+                                if ($imageMain->getWidth() > 1920) {
+                                    $imageMain->resizeToWidth(1920);
+                                }
+                                if ($imageMain->getHeight() > 1080) {
+                                    $imageMain->resizeToHeight(1080);
+                                }
+                                
+                                $formD['imgPath'] = $user->getContentId() . '/' . $rename;
+                            }
+
+                            $galleryManager = new GalleryManager();
+
+                            // Fill missing info about the user, author of this image
+                            $formD['userId'] = $user->getId();
+                            $formD['author'] = $user->getUserName();
+
+                            // Creates an image object to add it to the db
+                            $image = new Image($formD);
+
+                            if ($galleryManager->galleryCreate($image))
+                            { // Should succeed if userId valid
+                                $d['Success'] = 'Image postée avec succès';
+                                $imageThumb->save($thumb_file);                               
+                                $imageMain->save($target_file);                            
+                            }
+
+                        }
+
+                        $d['Data'] = $formD;
+                        $d['Errors'] = $errors;
                     }
-
                 }
-
-                $d['Data'] = $formD;
-                $d['Errors'] = $errors;
-
-                //var_dump($d);
-
             }
         }
         
@@ -160,34 +157,222 @@ class galleryController extends Controller
         $this->render("galleryCreate", true);
     }
 
+    function galleryEdit(...$ids)
+    { // AJAX
+        $d = [];
+
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            $userId = (int) $ids[0];
+            $imageId = (int) $ids[1];
+            
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($userId, 'Id');
+
+            if (!empty($user))
+            {
+                $d['User'] = $user;
+
+                $validUser = $this->isUserPageOwner($user);
+                $d['Owner'] = $validUser;
+                
+                if ($validUser) {
+
+                    $galleryManager = new GalleryManager();
+
+                    $image = $galleryManager->getImageContent($imageId);
+
+                    if (!empty($image[0])) {
+                        $image = $image[0];
+
+                        $d['Image'] = $image;
+
+                        $formD['author'] = $image->getAuthor();
+                        $formD['title'] = $image->getImgTitle();
+                        $formD['content'] = $image->getImgContent();
+                        $formD['userId'] = $image->getId();
+                        $formD['dateEdited'] = $image->getDateEdited();
+
+                        $oldImage = ROOT . "images/gallery/" . $image->getImgPath();
+                        $oldImageThumbnail = ROOT . "images/gallery/" . $image->getImgThumbnail();
+
+                    }
+
+                    if (isset($_POST["postTitle"]))
+                    {                
+                        $formD = [];
+
+                        $formD = $_POST;
+                        $errors = [];
+
+                        $formD['title'] = $formD['postTitle'];
+                        $formD['content'] = $formD['postContent'];
+
+                        if (empty($formD['title']))
+                        { // title is empty
+                            $errors['titleEmpty'] = 'Veuillez renseigner un titre';
+                        } 
+                        else 
+                        {
+                            $titleLen = strlen($formD['title']);
+                            if ($titleLen > 100)
+                            { // title too long, less than 30 characters
+                                $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
+                            }
+                        }
+
+                        if (empty($formD['content']))
+                        { // content is empty
+                            $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
+                        } 
+                        else 
+                        {
+                        }
+
+                        //// IMAGE                        
+                        if (!empty($_FILES['fileUpload']['name'])) {
+                            $file = $_FILES["fileUpload"]["tmp_name"][0];
+                            $name = basename($_FILES["fileUpload"]["name"][0]); // basename() may prevent filesystem traversal attacks;
+                            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                            
+                            if (!in_array($extension, array('jpg', 'png', 'jpeg', 'gif')))
+                            { // Allow only some formats
+                                $errors['imageFormat'] = "Image - Seuls les formats JPG, JPEG, PNG & GIF sont autorisés."; 
+                            }
+                        }
+                        ////
+
+                        if (!empty($file))
+                        { //// IMAGE
+                            require_once(ROOT . 'Models/SimpleImage.php');
+                           
+                            $imageThumb = new SimpleImage();
+                            
+                            // Creates user folder if doesn't exist
+                            $target_folder = ROOT . "images/gallery/" . $user->getContentId();
+                            if (!is_dir($target_folder))
+                            { mkdir($target_folder); }
+                            
+                            // Rename the image with the title
+                            $rename = $this->removeAccents($formD['title']);
+                            $rename = $this->urlValidId($rename)  . '.' . $extension;
+
+                            // Thumbnail
+                            $thumb_folder = $target_folder . '/thumbnails/';
+                            if (!is_dir($thumb_folder)) 
+                            { mkdir($thumb_folder); }
+
+                            $thumb_file = $thumb_folder . '/' . $rename;
+                           
+                            $imageThumb->load($file);
+                            if ($imageThumb->getWidth() > 300) {
+                                $imageThumb->resizeToWidth(300);
+                            }
+                            if ($imageThumb->getHeight() > 300) {
+                                $imageThumb->resizeToHeight(300);
+                            }
+
+                            $formD['ImgThumbnail'] = $user->getContentId() . '/thumbnails/' . $rename;
+
+                            // Main image
+                            $imageMain = new SimpleImage();
+                            $target_file = $target_folder . '/' . $rename;
+
+                            $imageMain->load($file);
+                            if ($imageMain->getWidth() > 1920) {
+                                $imageMain->resizeToWidth(1920);
+                            }
+                            if ($imageMain->getHeight() > 1080) {
+                                $imageMain->resizeToHeight(1080);
+                            }
+
+                            
+                            $formD['imgPath'] = $user->getContentId() . '/' . $rename;
+                        }
+
+                        if (empty($errors))
+                        { // If everything is good, post image
+
+                            $image->setImgTitle($formD['title']);
+                            $image->setImgContent($formD['content']);
+
+                            if (!empty($imageMain)) 
+                            {
+                                $image->setImgPath($formD['imgPath']);
+                                $image->setImgThumbnail($formD['ImgThumbnail']);
+                            }
+
+                            if ($galleryManager->galleryUpdate($image))
+                            { // Should succeed if userId valid
+                                $d['Success'] = 'Image mise à jour avec succès';
+
+                                if (!empty($imageMain)) 
+                                { // Save new images on the server and delete the old ones
+                                    if (file_exists($oldImageThumbnail)) {
+                                        unlink($oldImageThumbnail);
+                                    }
+                                    $imageThumb->save($thumb_file);
+                                    if (file_exists($oldImage)) {
+                                        unlink($oldImage);
+                                    }                                    
+                                    $imageMain->save($target_file);
+                                }
+
+                            }
+                        }
+                        
+                        $d['Errors'] = $errors;
+                    }
+
+                    $formD = $this->secure_form($formD);                    
+                    $d['Data'] = $formD;
+                }
+            }
+        }
+        
+        $this->set($d);
+        $this->render("galleryEdit", true);
+    }
+
     function gallery(...$data)
     { // AJAX
-        require_once(ROOT . 'Models/UserManager.php');
-        require_once(ROOT . 'Models/GalleryManager.php');
-        require_once(ROOT . 'Models/User.php');
-        require_once(ROOT . 'Models/Image.php');
 
         $d = [];
 
         if (!empty($data[0]))
         { // User ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $userId = (int) $data[0];
 
             // Get user data if found
             $userManager = new UserManager();
-            $user = $userManager->getUserInfoBy($data[0], 'Id');
+            $user = $userManager->getUserInfoBy($userId, 'Id');
 
             if (!empty($user))
             { // User data found and ready
                 $galleryManager = new GalleryManager();
-                $images = $galleryManager->getGallery($user->getId());
+
+                // Pagination
+                $page = !empty($data[1]) ? (int) $data[1] : 1;
+                if ($page < 1) { $page = 1; } // Not valid / 0
+
+                $count = $galleryManager->numElt($userId);               
+                $numPerPage = IMAGES_PER_PAGE; // Number of posts on the page
+                $numPages = ceil($count / $numPerPage);
+                $d['NumPages'] = $numPages;
+                $d['CurrentPage'] = 1;
+
+                $page = $page > $numPages ? $numPages : $page; // Page max?
+                $d['CurrentPage'] = $page;
+
+                $images = $galleryManager->getGallery($user->getId(), $page);
+               
                 if (!empty($images)) 
                 { // User data found and ready
                     $d['Images'] = $images;
                 }
                 $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user->getContentId());
+                $d['Owner'] = $this->isUserPageOwner($user);
             }
         }
 
@@ -195,39 +380,214 @@ class galleryController extends Controller
         $this->render("gallery", true);
     }
 
-    function gallerySingle(...$data)
-    { // AJAX
-        require_once(ROOT . 'Models/UserManager.php');
-        require_once(ROOT . 'Models/User.php');
-        require_once(ROOT . 'Models/Image.php');
+    function gallerySingle(...$ids)
+    { // AJAX    
 
         $d = [];
 
-        /*
-        if (!empty($data[0]))
-        { // User ID parameter went trough
+        if (!empty($ids[0]))
+        { // Image ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $imgId = (int) $ids[0];
 
-            // Get user data if found
             $userManager = new UserManager();
-            $user = $userManager->getUserInfoBy($data[0], 'Id');
-  
-            if (!empty($user))
-            { // User data found and ready
-                $images = $userManager->getImages($user->getId());
-                if (!empty($images)) 
-                { // User data found and ready
-                    $d['Images'] = $images;
+            $galleryManager = new GalleryManager();
+            $image = $galleryManager->getImageContent($imgId);
+
+            if (!empty($image)) 
+            {
+                $image = $image[0];
+
+                // Add 1 view
+                $galleryManager->addOne($image->getId());
+
+                // Convert BBcode
+                //$image->setImgContent($this->secure_input($image->getImgContent()));
+                //$image->setImgContent($this->ParseBBCode($image->getImgContent()));
+
+                // Get author user data
+                $author = $userManager->getUserInfoBy($image->getUserId(), 'id');
+                
+                if (!empty($author))
+                { // Author data found
+                    $d['Author'] = $author;
+                    $d['Image'] = $image;                    
+
+                    $commentManager = new CommentManager();
+
+                    if (CONNECTED) 
+                    { // Get user data if connected
+
+                        $d['Owner'] = $this->isUserPageOwner($author);
+
+                        $user = $userManager->getUserInfoBy($_SESSION['userId'], 'id');
+                        if (!empty($user))
+                        {
+                            $d['User'] = $user;
+                            $d['ImageLiked'] = $galleryManager->liked($image->getId(), $user->getId());
+                            
+                            ///// Form comment
+                            if (isset($_POST['msgContent']))
+                            {  
+                                $formD = [];
+                                $errors = [];
+
+                                $formD = $_POST;
+                                $formD['commentContent'] = $formD['msgContent'];
+
+                                if (empty($formD['commentContent']))
+                                { // message content is empty
+                                    $errors['commentContentLen'] = 'Veuillez renseigner un contenu';
+                                } 
+                                else 
+                                {
+                                    $contentLen = strlen($formD['commentContent']);
+                                    if ($contentLen > 500)
+                                    { // message content too long, less than 30 characters
+                                        $errors['commentContentLen'] = 'Le contenu du message est trop long, moins de 500 caractères sont requis.'; 
+                                    } 
+                                }
+
+                                if (empty($errors)) 
+                                { // If everything is good, post the image
+
+                                    $formD['postId'] = $image->getId();
+                                    $formD['userId'] = $user->getId();
+                                    $formD['userName'] = $user->getUserName();
+                                    $comment = new Comment($formD);
+
+                                    if ($commentManager->createComment($comment, DB_COMMENTS_IMG))
+                                    { // Should succeed if userId valid
+                                        $galleryManager->addOne($image->getId(), 'comments');
+                                    }
+                                }
+
+                                $d['Data'] = $formD;
+                                $d['Errors'] = $errors;
+
+                            }
+                            /////
+                        }
+                    }
+
+                    // Set up comments
+                    $userId = 0;
+                    if (!empty($user))
+                    { // To check liked comments by the user
+                        $userId = $user->getId();
+                    }
+
+                    $comments = $commentManager->getComments($imgId, $userId, DB_COMMENTS_IMG);
+                    if (!empty($comments)) 
+                    {
+                        foreach ($comments as $key => $com) {
+                            // Secure data
+                            $comments[$key]['commentContent'] = $this->secure_input($com['commentContent']);
+                        }
+                        $d['Comments'] = $comments;
+                    }
+
                 }
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user->getContentId());
             }
         }
-        */
 
         $this->set($d);
-        $this->render("imageSingle", true);
+        $this->render("gallerySingle", true);
     }
+
+    function likeImage(...$ids)
+    { // AJAX
+        if (CONNECTED) 
+        { // Check if connected and if the id correspond to the session variable
+            if (!empty($ids[0]) && !empty($ids[1]))
+            {
+                // Secure data passed
+                $imgId = (int) $ids[0]; // imgId
+                $userId = (int) $ids[1]; // userId
+
+                if ($imgId > 0 && $userId > 0) {
+                    if ($_SESSION['userId'] === $userId)
+                    { // Making sure the connected user correspond to the id in session
+                        $galleryManager = new GalleryManager();
+                        if ($galleryManager->likeImage($imgId, $userId))
+                        { // Add 1 like on the post, done in likeImage method
+                            //$galleryManager->addOne($imgId, 'likes');
+                        }
+                    }
+                }
+            }
+        }        
+    }
+
+    function delPost(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $imgId = (int) $ids[0]; // imgId
+            $userId = (int) $ids[1]; // userId
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($userId, 'id');
+
+            if ($this->isUserPageOwner($user)) 
+            { // Making sure the connected user is the owner
+                $galleryManager = new GalleryManager();
+                $image = $galleryManager->getImageContent($imgId);
+                if (!empty($image[0])) {
+                    if ($galleryManager->deleteImage($imgId))
+                    { // Delete images linked to this post
+                        $target_file = ROOT . "images/gallery/" . $image[0]->getImgPath();
+                        $thumb_file = ROOT . "images/gallery/" . $image[0]->getImgThumbnail();
+                        if (file_exists($target_file)) {
+                            unlink($target_file);
+                        }
+                        if (file_exists($thumb_file)) {
+                            unlink($thumb_file);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ///// Comment
+    function likeComment(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $comId = (int) $ids[0]; // comId
+            $postId = (int) $ids[1]; // postId
+            $userId = (int) $ids[2]; // userId
+
+            if ($this->isUserOwner($userId))
+            { // Making sure the connected user correspond to the id in session
+                $commentManager = new CommentManager();
+                if ($commentManager->likeComment($comId, $postId, $userId, DB_COMMENTS_IMG)) {
+                    $this->addOne($postId, 'likes', '-');
+                }
+            }
+        }    
+    }
+
+    function delComment(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $comId = (int) $ids[0]; // comId
+            $postId = (int) $ids[1]; // postId
+            $userId = (int) $ids[2]; // userId
+
+            if ($this->isUserOwner($userId))
+            { // Making sure the connected user correspond to the id in session
+                $commentManager = new CommentManager();
+                if ($commentManager->deleteComment($comId, $postId, $userId, DB_COMMENTS_IMG)) {
+                    $this->addOne($postId, 'comments', '-');
+                }
+            }
+        }    
+    }
+    /////
 
 }

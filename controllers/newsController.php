@@ -1,79 +1,95 @@
 <?php
 
+require_once(ROOT . 'Models/NewsManager.php');
+require_once(ROOT . 'Models/News.php');
+require_once(ROOT . 'Models/UserManager.php');
+require_once(ROOT . 'Models/User.php');
+require_once(ROOT . 'Models/CommentManager.php');
+require_once(ROOT . 'Models/Comment.php');
+
 class newsController extends Controller
 {
 
-    function newsCreate(...$data)
+    function newsCreate(...$ids)
     { // AJAX
         $d = [];
 
-        if (!empty($data[0]))
+        if (!empty($ids[0]))
         { // User ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $userId = (int) $ids[0];
 
-            if (isset($_POST["title"]))
-            {                
-                $formD = [];
+            require_once(ROOT . 'Models/UserManager.php');                                        
+            require_once(ROOT . 'Models/User.php');
 
-                $formD = $this->secure_form($_POST);
-                $errors = [];
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($ids[0], 'Id');
 
-                $formD['newsTitle'] = $_POST['title'];
-                $formD['newsContent'] = $_POST['content'];
+            if (!empty($user))
+            {
+                $validUser = $this->isUserPageOwner($user);
+                $d['Owner'] = $validUser;
 
-                if (empty($formD['newsTitle']))
-                { // title is empty
-                    $errors['titleEmpty'] = 'Veuillez renseigner un titre';
-                } 
-                else 
-                {
-                    $titleLen = strlen($formD['newsTitle']);
-                    if ($titleLen > 100)
-                    { // title too long, less than 30 characters
-                        $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
-                    } 
-                }
+                if ($validUser) {
 
-                if (empty($formD['newsContent']))
-                { // content is empty
-                    $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
-                } 
-                else 
-                {
-                }
+                    $d['User'] = $user;
 
-                if (empty($errors)) 
-                { // If everything is good, post news
-                    require_once(ROOT . 'Models/NewsManager.php');
-                    require_once(ROOT . 'Models/UserManager.php');
-                    require_once(ROOT . 'Models/News.php');                    
-                    require_once(ROOT . 'Models/User.php');
+                    if (isset($_POST["postTitle"]))
+                    {                
+                        $formD = [];
 
-                    $userManager = new UserManager();
-                    $user = $userManager->getUserInfoBy($data[0], 'Id');
+                        $formD = $_POST;
+                        $errors = [];
 
-                    if (!empty($user))
-                    {
-                        $newsManager = new NewsManager();
+                        $formD['newsTitle'] = $formD['postTitle'];
+                        $formD['newsContent'] = $formD['postContent'];
 
-                        // Fill missing info about the user, author of this news
-                        $formD['userId'] = $user->getId();
-                        $formD['author'] = $user->getUserName();
-                        // Creates a news object to add it to the db
-                        $news = new News($formD);
-
-                        if ($newsManager->newsCreate($news))
-                        { // Should succeed if userId valid
-                            $d['Success'] = 'Nouvelle postée avec succès';
+                        if (empty($formD['newsTitle']))
+                        { // title is empty
+                            $errors['titleEmpty'] = 'Veuillez renseigner un titre';
+                        } 
+                        else 
+                        {
+                            $titleLen = strlen($formD['newsTitle']);
+                            if ($titleLen > 100)
+                            { // title too long, less than 30 characters
+                                $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
+                            } 
                         }
-                    }
 
+                        if (empty($formD['newsContent']))
+                        { // content is empty
+                            $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
+                        } 
+                        else 
+                        {
+                        }
+
+                        if (empty($errors)) 
+                        { // If everything is good, post news
+                            require_once(ROOT . 'Models/NewsManager.php');
+                            require_once(ROOT . 'Models/News.php');
+                            $newsManager = new NewsManager();
+
+                            // Fill missing info about the user, author of this news
+                            $formD['userId'] = $user->getId();
+                            $formD['author'] = $user->getUserName();
+                            // Creates a news object to add it to the db
+                            $news = new News($formD);
+
+                            if ($newsManager->newsCreate($news))
+                            { // Should succeed if userId valid
+                                $d['Success'] = 'Nouvelle postée avec succès';
+                            }
+                        }
+
+                        $formD = $this->secure_form($formD);
+                        
+                        $d['Data'] = $formD;
+                        $d['Errors'] = $errors;
+
+                    }                    
                 }
-
-                $d['Data'] = $formD;
-                $d['Errors'] = $errors;
-
             }
         }
         
@@ -81,41 +97,144 @@ class newsController extends Controller
         $this->render("newsCreate", true);
     }
 
-    function news(...$data)
-    { // AJAX $data[0] = user id / $data[1] = page
-        require_once(ROOT . 'Models/UserManager.php');
-        require_once(ROOT . 'Models/NewsManager.php');
-        require_once(ROOT . 'Models/User.php');
-        require_once(ROOT . 'Models/News.php');
+    function newsEdit(...$ids)
+    { // AJAX
+        $d = [];
+
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            $userId = (int) $ids[0];
+            $newsId = (int) $ids[1];
+            
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($userId, 'Id');
+
+            if (!empty($user))
+            {
+                $d['User'] = $user;
+
+                $validUser = $this->isUserPageOwner($user);
+                $d['Owner'] = $validUser;
+
+                if ($validUser) {
+
+                    $newsManager = new NewsManager();
+                    $news = $newsManager->getNewsContent($newsId);
+
+                    if (!empty($news[0])) {
+                        $news = $news[0];
+
+                        $d['News'] = $news;
+
+                        $formD['author'] = $news->getAuthor();
+                        $formD['title'] = $news->getNewsTitle();
+                        $formD['content'] = $news->getNewsContent();
+                        $formD['userId'] = $user->getId();
+                        $formD['dateEdited'] = $news->getDateEdited();
+
+                    }
+
+                    if (isset($_POST["postTitle"]))
+                    {                
+                        $formD = [];
+
+                        $formD = $_POST;
+                        $errors = [];
+
+                        $formD['title'] = $formD['postTitle'];
+                        $formD['content'] = $formD['postContent'];
+
+                        if (empty($formD['title']))
+                        { // title is empty
+                            $errors['titleEmpty'] = 'Veuillez renseigner un titre';
+                        } 
+                        else 
+                        {
+                            $titleLen = strlen($formD['title']);
+                            if ($titleLen > 100)
+                            { // title too long, less than 30 characters
+                                $errors['titleLen'] = 'Le titre est trop long, moins de 100 caractères sont requis.'; 
+                            } 
+                        }
+
+                        if (empty($formD['content']))
+                        { // content is empty
+                            $errors['contentEmpty'] = 'Veuillez renseigner un contenu';
+                        } 
+                        else 
+                        {
+                        }
+
+                        if (empty($errors)) 
+                        { // If everything is good, post news
+
+                            $news->setNewsTitle($formD['title']);
+                            $news->setNewsContent($formD['content']);
+
+                            if ($newsManager->newsUpdate($news))
+                            { // Should succeed if userId valid
+                                $d['Success'] = 'Nouvelle mise à jour avec succès';
+                            }
+                        }
+                        
+                        $d['Errors'] = $errors;
+
+                    }
+                    
+                    $formD = $this->secure_form($formD);
+                    $d['Data'] = $formD;
+                }
+            }
+        }
+        
+        $this->set($d);
+        $this->render("newsEdit", true);
+    }
+
+    function news(...$ids)
+    { // AJAX
 
         $d = [];
 
-        if (!empty($data[0]))
+        if (!empty($ids[0]))
         { // User ID parameter went trough
           // Secure url input
-            $data[0] = (int) $data[0];
+            $userId = (int) $ids[0];
 
             // Get user data if found
             $userManager = new UserManager();
-            $user = $userManager->getUserInfoBy($data[0], 'Id');
+            $user = $userManager->getUserInfoBy($userId, 'Id');
 
             if (!empty($user))
             { // User data found and ready
-
-                // Check if param for page exists
-                // Checks if it's a number and greater than 0, else set it to one
-                $data[1] = empty($data[1]) ? 1 : (int) $data[1];
-                $data[1] = $data[1] < 1 ? 1 : $data[1];
-
                 $newsManager = new NewsManager();
-                $news = $newsManager->getNews($user->getId(), $data[1]);
+
+                if (!empty($_POST['pageSelector'])) 
+                { // Get page from page selector form
+                    $ids[1] = (int) $_POST['pageSelector'];
+                }                
+
+                // Pagination
+                $page = !empty($ids[1]) ? (int) $ids[1] : 1;
+                if ($page < 1) { $page = 1; } // Not valid / 0
+
+                $count = $newsManager->numElt($userId);               
+                $numPerPage = NEWS_PER_PAGE; // Number of posts on the page
+                $numPages = ceil($count / $numPerPage);
+                $d['NumPages'] = $numPages;
+                $d['CurrentPage'] = 1;
+
+                $page = $page > $numPages ? $numPages : $page; // Page max?
+                $d['CurrentPage'] = $page;     
+
+                $news = $newsManager->getNews($user->getId(), $page);
 
                 if (!empty($news))
                 { // News existing
                     $d['News'] = $news;
                 }
                 $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user->getContentId());
+                $d['Owner'] = $this->isUserPageOwner($user);
             }
         }
 
@@ -125,36 +244,26 @@ class newsController extends Controller
 
     function newsSingle(...$ids)
     { // AJAX
-        require_once(ROOT . 'Models/UserManager.php');
-        require_once(ROOT . 'Models/NewsManager.php');
-        require_once(ROOT . 'Models/User.php');
-        require_once(ROOT . 'Models/News.php');
-        require_once(ROOT . 'Models/Comment.php');
-
         $d = [];
 
         if (!empty($ids[0]))
         { // News ID parameter went trough
           // Secure url input
-            $ids[0] = (int) $ids[0];
+            $newsId = (int) $ids[0];
 
             $userManager = new UserManager();
             $newsManager = new NewsManager();
-            $news = $newsManager->getNewsContent($ids[0]);
+            $news = $newsManager->getNewsContent($newsId);
 
             if (!empty($news)) 
             {
                 $news = $news[0];
 
+                // Add 1 view
+                $newsManager->addOne($news->getId());
+
                 // Convert BBcode
-                /*
-                $parser = new ROOT\Vendor\SBBCodeParser\Node_Container_Document();
-                $news->setNewsContent($parser->parse($news->getNewsContent())
-                ->detect_links()
-                ->detect_emails()
-                ->detect_emoticons()
-                ->get_html());
-                */
+                //$news->setNewsContent($this->ParseBBCode($news->getNewsContent()));
 
                 // Get author user data
                 $author = $userManager->getUserInfoBy($news->getUserId(), 'id');
@@ -164,10 +273,12 @@ class newsController extends Controller
                     $d['Author'] = $author;
                     $d['News'] = $news;                    
 
+                    $commentManager = new CommentManager();
+                    
                     if (CONNECTED) 
                     { // Get user data if connected
 
-                        $d['Owner'] = $this->isUserPageOwner($author->getContentId());
+                        $d['Owner'] = $this->isUserPageOwner($author);
 
                         $user = $userManager->getUserInfoBy($_SESSION['userId'], 'id');
                         if (!empty($user))
@@ -181,8 +292,8 @@ class newsController extends Controller
                                 $formD = [];
                                 $errors = [];
 
-                                $formD = $this->secure_form($_POST);
-                                $formD['commentContent'] = $_POST['msgContent'];
+                                $formD = $_POST;
+                                $formD['commentContent'] = $formD['msgContent'];
 
                                 if (empty($formD['commentContent']))
                                 { // message content is empty
@@ -200,13 +311,14 @@ class newsController extends Controller
                                 if (empty($errors)) 
                                 { // If everything is good, post news
 
-                                    $formD['newsId'] = $news->getId();
-                                    $formD['userName'] = $user->getUserName();
+                                    $formD['postId'] = $news->getId();
+                                    $formD['userId'] = $user->getId();
+                                    $formD['userName'] = $user->getUserName();                                    
                                     $comment = new Comment($formD);
 
-                                    if ($newsManager->createComment($comment))
+                                    if ($commentManager->createComment($comment, DB_COMMENTS_NEWS))
                                     { // Should succeed if userId valid
-            
+                                        $newsManager->addOne($news->getId(), 'comments');
                                     }
                                 }
 
@@ -218,9 +330,21 @@ class newsController extends Controller
                         }
                     }
 
-                    $comments = $newsManager->getComments($ids[0]);
+                    // Set up comments
+                    $userId = 0;
+                    if (!empty($user))
+                    { // To check liked comments by the user
+                        $userId = $user->getId();
+                    }
+
+                    $comments = $commentManager->getComments($newsId, $userId, DB_COMMENTS_NEWS);
+                    
                     if (!empty($comments)) 
                     {
+                        foreach ($comments as $key => $com) {
+                            // Secure data
+                            $comments[$key]['commentContent'] = $this->secure_input($com['commentContent']);
+                        }
                         $d['Comments'] = $comments;
                     }
 
@@ -245,7 +369,6 @@ class newsController extends Controller
                 if ($newsId > 0 && $userId > 0) {
                     if ($_SESSION['userId'] === $userId)
                     { // Making sure the connected user correspond to the id in session
-                        require_once(ROOT . 'Models/NewsManager.php');
                         $newsManager = new NewsManager();
                         $newsManager->likeNews($newsId, $userId);
                     }
@@ -253,5 +376,64 @@ class newsController extends Controller
             }
         }        
     }
- 
+
+    function delPost(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $newsId = (int) $ids[0]; // newsId
+            $userId = (int) $ids[1]; // userId
+
+            $userManager = new UserManager();
+            $user = $userManager->getUserInfoBy($userId, 'id');
+
+            if ($this->isUserPageOwner($user))
+            { // Making sure the connected user correspond to the id in session
+                $newsManager = new NewsManager();
+                $newsManager->deletePost($newsId);
+            }
+        }    
+    }
+
+    ///// Comment
+    function likeComment(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $comId = (int) $ids[0]; // comId
+            $postId = (int) $ids[1]; // postId
+            $userId = (int) $ids[2]; // userId
+
+            if ($this->isUserOwner($userId))
+            { // Making sure the connected user correspond to the id in session
+                $commentManager = new CommentManager();
+                if ($commentManager->likeComment($comId, $postId, $userId, DB_COMMENTS_NEWS)) {
+                    $this->addOne($postId, 'likes', '-');
+                }
+            }
+        }    
+    }
+
+    function delComment(...$ids)
+    { // AJAX
+        if (!empty($ids[0]) && !empty($ids[1]))
+        {
+            // Secure data passed
+            $comId = (int) $ids[0]; // comId
+            $postId = (int) $ids[1]; // postId
+            $userId = (int) $ids[2]; // userId
+
+            if ($this->isUserOwner($userId))
+            { // Making sure the connected user correspond to the id in session
+                $commentManager = new CommentManager();
+                if ($commentManager->deleteComment($comId, $postId, $userId, DB_COMMENTS_NEWS)) {
+                    $this->addOne($postId, 'comments', '-');
+                }
+            }
+        }    
+    }
+    /////
+
 }
