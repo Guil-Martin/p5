@@ -1,12 +1,67 @@
 ;(function () {
 
+    // Home events
+    //$(".content_single").on("click", (e) => { modalContent(e) })
+    $("#filters").submit((e) => {
+        e.preventDefault();
+        let validateForm = $(e.target);
+        let formData = new FormData();
+        let form_data = validateForm.serializeArray();
+        $.each(form_data, function (key, input) {
+            formData.append(input.name, input.value);
+        });
+        homeContent(e, formData)
+    });
+
+    $("#filters").trigger( "submit" );     
+
+    function homeContent(e, values = []) {
+        let tar = $(e.target);
+        let cont = tar.attr('cont');
+
+        if (!cont) {
+            tar = tar.parent();
+            cont = tar.attr('cont');
+        }
+        if (cont) {
+            $.ajax ({ 
+                url: cont,
+                data: values,
+                processData: false,
+                contentType: false,
+                type: 'POST',
+                success: (output) => {
+                    $(".homePageContent").html(output);
+                    $(".page-link").on("click", (e) => { homeContent(e) })
+                    $(".content_single").on("click", (e) => { modalContent(e) })
+                    let pageSelect = $('#pageSelect')
+                    if (pageSelect != null) {
+                        pageSelect.submit((e) => {
+                            e.preventDefault();
+                            $(".submit").attr("disabled", true);
+                            $('.enableOnInput').prop('disabled', true);
+                            let formData = new FormData();
+                            let form_data = pageSelect.serializeArray();
+                            $.each(form_data, function (key, input) {
+                                formData.append(input.name, input.value);
+                            });
+                            homeContent(e, formData)
+                        });
+                    }
+                },
+                error: (xhr, ajaxOptions, thrownError) => { console.log(thrownError) }
+            });
+        }
+    }
+
     // User page content tabs
     $(".userPageTabs").on("click", (e) => { userPageTabs(e) })
-    $( "#Gallery" ).trigger( "click" );
-
-    function userPageTabs(e) {
+    $("#Gallery").trigger( "click" );    
+    
+    function userPageTabs(e, values = []) {
         let tab = $(e.target);
         let cont = tab.attr('cont');
+
         if (!cont) {
             tab = tab.parent();
             cont = tab.attr('cont');
@@ -17,10 +72,27 @@
 
             $.ajax ({ 
                 url: cont,
-                async: true,
+                data: values,
+                processData: false,
+                contentType: false,
+                type: 'POST',
                 success: (output) => {
-                    $(".userPageContent").html(output);              
-                    $(".content_single").on("click", (e) => { e.stopPropagation(); modalContent(e) })
+                    $(".userPageContent").html(output);                    
+                    $(".page-link").on("click", (e) => { userPageTabs(e) })
+                    $(".content_single").on("click", (e) => { modalContent(e) })
+                    let pageSelect = $('#pageSelect')
+                    if (pageSelect != null) {
+                        pageSelect.submit((e) => {
+                            e.preventDefault();                            
+                            $(".submit").attr("disabled", true);
+                            let formData = new FormData();
+                            let form_data = pageSelect.serializeArray();
+                            $.each(form_data, function (key, input) {
+                                formData.append(input.name, input.value);
+                            });
+                            userPageTabs(e, formData)
+                        });
+                    }
                 },
                 error: (xhr, ajaxOptions, thrownError) => {
                     console.log(thrownError)
@@ -30,26 +102,19 @@
     }
 
     // Modal content
-    $(".postContent").on("click", (e) => {e.stopPropagation(); modalContent(e) })
+    $(".postContent").on("click", (e) => { modalContent(e) })
 
     function modalContent(e, values = []) {
         let tar = $(e.target);
         let cont = tar.attr('cont');
-
-        //console.log(values);
-        console.log(values);
-        if (values[1]) {
-            console.log('values[1] - ' + values[1].value);
-            console.log($("#content"));
-
-            //var value = $("#content").getBody().html();
-            //console.log('value - ' + value);
-
-        }
-
         if (!cont) {
             tar = tar.parent();
             cont = tar.attr('cont');
+        }
+        if (tar.hasClass('del')) { 
+            if (confirm('Confirmer ?')) {
+                let modalBody = $(".modal-body");
+            } else { return; }            
         }
         if (cont) {
             $.ajax ({ 
@@ -64,51 +129,61 @@
                     let modalBody = $(".modal-body");
                     modalBody.html(output);
     
-                    if (!modal.hasClass('show')) {
-                        modal.modal('toggle');
+                    if (tar.hasClass('del')) { 
+                        $("#Nouvelles").trigger( "click" );
+                    } else {
+                        if (!modal.hasClass('show')) {
+                            modal.modal('toggle');
+                        }
                     }
                     
                     let validateForm = $('#validateForm')
                     if (validateForm != null) {
+
+                        /* BBCODE editor */
+                        let textArea = $("#postContent");
+                        if (textArea) {
+                           // textArea.richText();
+                        }
+
+                        tinymce.remove();
+                        tinymce.init({
+                            selector: '#postContent',                            
+                           /* plugins: "bbcode",
+                            bbcode_dialect: "punbb",*/
+                            language: 'fr_FR',
+                            width: '100%',
+                            height: 500,
+                            skin: 'oxide-dark',
+                            content_css: 'dark',
+                            entity_encoding : "raw"
+                        });
+
                         validateForm.submit((e) => {
                             e.preventDefault();
+                            $(".submit").attr("disabled", true);
                             let formData = new FormData();
-                            console.log(formData);
-                            /*
-                            let textArea = $("#content");
-                            textArea[0].sceditor('instance').updateOriginal();
-                            */
-                           
-                            /*
-                            var textArea = $("#content").sceditor('instance');
-                            var value = textArea.getBody().html();
-                            console.log(validateForm);
-                            */
+
+                            /* BBCODE editor */
+                            //wswgEditor.doCheck();
+
                             let form_data = validateForm.serializeArray();
                             $.each(form_data, function (key, input) {
                                 formData.append(input.name, input.value);
                             });
                             
                             //File data
-                            let file_data = $('input[name="image"]')[0].files;
-                            for (let i = 0; i < file_data.length; i++) {
-                                formData.append("image[]", file_data[i]);
+                            let fileInput = $('input[name="fileUpload"]');                            
+                            if (fileInput[0]) {
+                                let file_data = $('input[name="fileUpload"]')[0].files;
+                                for (let i = 0; i < file_data.length; i++) {
+                                    formData.append("fileUpload[]", file_data[i]);
+                                }
                             }
 
                             modalContent(e, formData)
                         });
-                        /*
-                        let textArea = $("#content");
-                        if (textArea) {
-                            sceditor.create(textArea[0], {
-                                format: 'bbcode',
-                                style: 'minified/themes/content/modern.min.css',
-                                toolbarExclude: 'emoticon',
-                                emoticonsEnabled: false
-                                //emoticonsRoot: 'p5/images/emoticons/',
-                            });
-                        }
-                        */
+
                     }
     
                     // Valid success
@@ -116,6 +191,9 @@
 
                     // Likes
                     $(".like").on("click", (e) => { like(e) })
+
+                    // del
+                    $(".delCom").on("click", (e) => { delCom(e) })
     
                 },
                 error: (xhr, ajaxOptions, error) => {
@@ -158,6 +236,29 @@
                     console.log(error)
                 }
             });
+        }
+    }
+
+    function delCom(e) {
+        let tar = $(e.target);
+        let cont = tar.attr('cont');
+        if (!cont) {
+            tar = tar.parent();
+            cont = tar.attr('cont');
+        }
+        if (cont) {
+            if (confirm('Confirmer ?')) {         
+                $.ajax ({ 
+                    url: cont,
+                    success: (output) => {
+                        alert(output)
+                        location.reload();
+                    },
+                    error: (xhr, ajaxOptions, error) => {
+                        console.log(error)
+                    }
+                });
+            }
         }
     }
     

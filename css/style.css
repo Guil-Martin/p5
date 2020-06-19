@@ -1,3 +1,142 @@
-body {
-    padding-top: 5rem;
+body { padding-top: 5rem; background-color: rgba(0,0,0,1);}
+
+.svg {
+    pointer-events: none;
+}
+
+.pagination
+{
+   
+}
+
+.pagination > li
+{
+    height: 50px;
+}
+
+.pagination > li > button,
+.pagination > li > div
+{
+    background-color: rgb(65,65,65) !important;
+}
+
+.pagination > li > button:focus,
+.pagination > li > button:hover,
+.pagination > li > button:focus,
+.pagination > li > button:hover
+{
+    background-color: rgb(120,120,120);
+}
+
+.pagination > .active > button
+{
+    background-color: rgb(120,120,120) !important;
+}
+
+.pagination > .active > button:hover
+{
+    background-color: rgb(120,120,120) !important;
+}
+
+.imgContainer {
+    height: 300px;
+    position: relative;
+}
+
+.imgContainer .userName {
+    position: absolute;
+    background-color: rgba(0,0,0,1);
+    width: 100%;
+    top: 20px;
+}
+
+.imgContainer .image {
+    pointer-events: none;
+    position: absolute;
+
+    bottom: 0;
+    transition: .5s ease;
+}
+
+.imgContainer img  {
+    object-fit: cover;
+    transition: .5s ease;
+}
+  
+.imgContainer .text {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0,0,0,1);
+    color: white;
+    font-size: 16px;
+}
+
+.imgContainer .buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.imgContainer:hover img {
+    /*transform: scale(1.5);*/
+    opacity: 0.3;
+}
+  
+.imgContainer:hover .middle {
+    opacity: 1;
+}
+
+.postContainer {
+    position: relative;
+    height: 200px;
+}
+
+.postContainer .userName {
+    width: 100%;
+    /*position: absolute;
+    top: 0;*/
+}
+
+.postContainer .title {
+    pointer-events: none;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.postContainer .date {
+    pointer-events: none;
+    /*position: absolute;*/
+    /*top: 25px;*/
+}
+
+.postContainer .buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.userName a {
+    color: white;
+}
+
+.stats {
+    pointer-events: none;
+    background-color: rgba(0,0,0,1);
+    position: absolute;
+    bottom: 0;
+    width: 100%;    
+}
+
+.commentBox {
+    position: relative;
+}
+
+.commentBox .sup {
+    position: absolute;
+    padding: 4px;
+    top: 0;
+    right: 0;
+
 }

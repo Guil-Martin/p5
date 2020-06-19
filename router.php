@@ -8,7 +8,7 @@ class Router
 
         $url = trim($url);
 
-        if ($url == "/p5/")
+        if ($url == WEBROOT)
         { // Page by default
             $request->controller = "home";
             $request->action = "index";
