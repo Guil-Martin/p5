@@ -1,4 +1,4 @@
-<h2 class="text-center">Poster une nouvelle</h2>
+<h2 class="text-center">Mettre à jour une nouvelle</h2>
 <?php
 
 if (!empty($Owner)) {
@@ -9,13 +9,25 @@ Your password must be 8-20 characters long, contain letters and numbers, and mus
 </small>
 */
 
+if (!empty($Data['dateEdited']))
+{ ?>
+    <p class="text-center">Dernière edition : <?php echo $Data['dateEdited'] ?></p>
+<?php
+} 
+else
+{
+?>
+    <p class="text-center">Pas encore édité</p>
+<?php
+}
+
 // Boolean to check if an error is existing
 $titleError = !empty($Errors['titleEmpty']) || !empty($Errors['titleLen']);
 $contentError = !empty($Errors['contentEmpty']) || !empty($Errors['contentLen']);
 
 if (!empty($Success))
 { ?>
-    <p class="text-center text-success">Nouvelle postée avec succès</p>
+    <p class="text-center text-success">Nouvelle modifiée avec succès</p>
     <div class="text-center mb-3">
         <button cont="Nouvelles" class="postSuccess btn btn-primary submit">Retour à la page de membre</button>
     </div>
@@ -25,7 +37,7 @@ else
 {
 ?>
 
-<form enctype="multipart/form-data" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'news/newsCreate/' . $User->getId() ?>">
+<form enctype="multipart/form-data" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'news/newsEdit/' . $User->getId()  . '/' . $News->getId() ?>">
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -36,8 +48,8 @@ else
                 </svg>
             </span>
         </div>
-        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['newsTitle']) ? 'is-valid' : '') ?>" 
-        name="postTitle" id="postTitle" <?php echo !empty($Data['newsTitle']) ? 'value="' . $Data['newsTitle'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
+        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['title']) ? 'is-valid' : '') ?>" 
+        name="postTitle" id="postTitle" <?php echo !empty($Data['title']) ? 'value="' . $Data['title'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
         <?php echo !empty($Errors['titleEmpty']) ? '<div class="invalid-feedback">' . $Errors['titleEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['titleLen']) ? '<div class="invalid-feedback">' . $Errors['titleLen'] . '</div>' : '' ?>
     </div>
@@ -53,8 +65,8 @@ else
             </span>
         </div>
         <textarea rows='20' 
-        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['newsContent']) ? 'is-valid' : '') ?>"
-        name="postContent" id="postContent" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['newsContent']) ? $Data['newsContent'] : '' ?></textarea>
+        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['content']) ? 'is-valid' : '') ?>"
+        name="postContent" id="postContent" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['content']) ? $Data['content'] : '' ?></textarea>
         <?php echo !empty($Errors['contentEmpty']) ? '<div class="invalid-feedback">' . $Errors['contentEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['contentLen']) ? '<div class="invalid-feedback">' . $Errors['contentLen'] . '</div>' : '' ?>
     </div>

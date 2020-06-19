@@ -1,23 +1,32 @@
-<h2 class="text-center">Poster une nouvelle</h2>
+<h2 class="text-center">Modifier une image</h2>
 <?php
 
 if (!empty($Owner)) {
 
-/*
-<small id="passwordHelpBlock" class="form-text text-muted"> 
-Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
-</small>
-*/
+
+
+if (!empty($Data['dateEdited']))
+{ ?>
+    <p class="text-center">Dernière edition : <?php echo $Data['dateEdited'] ?></p>
+<?php
+} 
+else
+{
+?>
+    <p class="text-center">Pas encore édité</p>
+<?php
+}
 
 // Boolean to check if an error is existing
 $titleError = !empty($Errors['titleEmpty']) || !empty($Errors['titleLen']);
+$imageError = !empty($Errors['imageFormat']);
 $contentError = !empty($Errors['contentEmpty']) || !empty($Errors['contentLen']);
 
 if (!empty($Success))
 { ?>
-    <p class="text-center text-success">Nouvelle postée avec succès</p>
+    <p class="text-center text-success">Image modifiée avec succès</p>
     <div class="text-center mb-3">
-        <button cont="Nouvelles" class="postSuccess btn btn-primary submit">Retour à la page de membre</button>
+        <button cont="Gallery" class="postSuccess btn btn-primary submit">Retour à la page de membre</button>
     </div>
 <?php
 }
@@ -25,7 +34,7 @@ else
 {
 ?>
 
-<form enctype="multipart/form-data" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'news/newsCreate/' . $User->getId() ?>">
+<form enctype="multipart/form-data" method="post" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'gallery/galleryEdit/' . $User->getId() . '/' . $Image->getId() ?>">
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -36,10 +45,22 @@ else
                 </svg>
             </span>
         </div>
-        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['newsTitle']) ? 'is-valid' : '') ?>" 
-        name="postTitle" id="postTitle" <?php echo !empty($Data['newsTitle']) ? 'value="' . $Data['newsTitle'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
+        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['title']) ? 'is-valid' : '') ?>" 
+        name="postTitle" id="postTitle" <?php echo !empty($Data['title']) ? 'value="' . $Data['title'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
         <?php echo !empty($Errors['titleEmpty']) ? '<div class="invalid-feedback">' . $Errors['titleEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['titleLen']) ? '<div class="invalid-feedback">' . $Errors['titleLen'] . '</div>' : '' ?>
+    </div>
+
+
+    <div class="mx-auto text-center" style="width: 150px; height: 150px;">
+        <img style="max-height: 100%;" src="<?php echo WEBROOT . 'images/gallery/' . $Image->getImgPath() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
+    </div>
+
+    <div class="form-group text-center mx-auto" style="width: 300px;">
+        <label for="fileUpload" aria-label="Image" title="Image" class="<?php echo $imageError ? 'is-invalid' : '' ?>">Image a poster</label>
+        <input type="file" id="image" name="fileUpload" class="form-control-file">
+        <?php echo !empty($Errors['imageEmpty']) ? '<div class="invalid-feedback">' . $Errors['imageEmpty'] . '</div>' : '' ?>
+        <?php echo !empty($Errors['imageFormat']) ? '<div class="invalid-feedback">' . $Errors['imageFormat'] . '</div>' : '' ?>
     </div>
 
     <div class="input-group mb-3">
@@ -52,13 +73,13 @@ else
                 </svg>
             </span>
         </div>
-        <textarea rows='20' 
-        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['newsContent']) ? 'is-valid' : '') ?>"
-        name="postContent" id="postContent" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['newsContent']) ? $Data['newsContent'] : '' ?></textarea>
+        <textarea rows='20'
+        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['content']) ? 'is-valid' : '') ?>"
+        name="postContent" id="postContent" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['content']) ? $Data['content'] : '' ?></textarea>
         <?php echo !empty($Errors['contentEmpty']) ? '<div class="invalid-feedback">' . $Errors['contentEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['contentLen']) ? '<div class="invalid-feedback">' . $Errors['contentLen'] . '</div>' : '' ?>
-    </div>
-
+     </div>
+   
     <div class="text-center">
         <button id="submit" type="submit" class="btn btn-primary submit">Valider</button>
     </div>
@@ -66,5 +87,6 @@ else
 
 <?php
 }
+
 }
 ?>

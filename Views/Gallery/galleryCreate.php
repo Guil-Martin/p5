@@ -1,6 +1,8 @@
 <h2 class="text-center">Poster une image</h2>
 <?php
 
+if (!empty($Owner)) {
+
 // Boolean to check if an error is existing
 $titleError = !empty($Errors['titleEmpty']) || !empty($Errors['titleLen']);
 $imageError = !empty($Errors['imageEmpty']) || !empty($Errors['imageFormat']);
@@ -18,7 +20,7 @@ else
 {
 ?>
 
-<form enctype="multipart/form-data" method="post" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'gallery/galleryCreate/' . $_SESSION['userId'] ?>">
+<form enctype="multipart/form-data" method="post" id="validateForm" class="mb-3" action="" cont="<?php echo WEBROOT . 'gallery/galleryCreate/' . $User->getId() ?>">
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -29,28 +31,18 @@ else
                 </svg>
             </span>
         </div>
-        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['title']) ? 'is-valid' : '') ?>" 
-        name="title" id="title" <?php echo !empty($Data['title']) ? 'value="' . $Data['title'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
+        <input type="text" class="form-control <?php echo $titleError ? 'is-invalid' : (!empty($Data['imgTitle']) ? 'is-valid' : '') ?>" 
+        name="postTitle" id="postTitle" <?php echo !empty($Data['imgTitle']) ? 'value="' . $Data['imgTitle'] . '"' : 'placeholder="Titre de la nouvelle"' ?>>
         <?php echo !empty($Errors['titleEmpty']) ? '<div class="invalid-feedback">' . $Errors['titleEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['titleLen']) ? '<div class="invalid-feedback">' . $Errors['titleLen'] . '</div>' : '' ?>
     </div>
 
-<?php
-/*
-    <div class="form-group">
-		<label for="image" aria-label="Image" title="Image">Image</label>
-		<input type="file" class="form-control-file" name="image">
-    </div>
-    */
-?>
-    <div class="custom-file pmd-custom-file">
-        <input type="file" name="image" class="custom-file-input <?php echo $imageError ? 'is-invalid' : '' ?>" id="image">
-        <label aria-label="Image" title="Image" class="custom-file-label <?php echo $imageError ? 'is-invalid' : '' ?>" for="image">Séléctionner une image</label>
+    <div class="form-group text-center mx-auto" style="width: 300px;">
+        <label for="fileUpload" aria-label="Image" title="Image" class="<?php echo $imageError ? 'is-invalid' : '' ?>">Image a poster</label>
+        <input type="file" id="image" name="fileUpload" class="form-control-file">
         <?php echo !empty($Errors['imageEmpty']) ? '<div class="invalid-feedback">' . $Errors['imageEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['imageFormat']) ? '<div class="invalid-feedback">' . $Errors['imageFormat'] . '</div>' : '' ?>
     </div>
-                                    
-
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -62,12 +54,12 @@ else
                 </svg>
             </span>
         </div>
-        <textarea rows='20' 
-        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['content']) ? 'is-valid' : '') ?>"
-        name="content" id="content" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['content']) ? $Data['content'] : '' ?></textarea>
+        <textarea rows='20'
+        class="form-control <?php echo $contentError ? 'is-invalid' : (!empty($Data['imgContent']) ? 'is-valid' : '') ?>"
+        name="postContent" id="postContent" placeholder="Contenu de la nouvelle"><?php echo !empty($Data['imgContent']) ? $Data['imgContent'] : '' ?></textarea>
         <?php echo !empty($Errors['contentEmpty']) ? '<div class="invalid-feedback">' . $Errors['contentEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['contentLen']) ? '<div class="invalid-feedback">' . $Errors['contentLen'] . '</div>' : '' ?>
-    </div>
+     </div>
    
     <div class="text-center">
         <button id="submit" type="submit" class="btn btn-primary submit">Valider</button>
@@ -75,5 +67,7 @@ else
 </form>
 
 <?php
+}
+
 }
 ?>

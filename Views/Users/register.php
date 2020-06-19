@@ -17,10 +17,15 @@ $nameError = !empty($Errors['nameLen']) || !empty($Errors['nameEmpty']) || !empt
 $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']);
 $passVerifyError = !empty($Errors['passVerify']) || !empty($Errors['passVerifyEmpty']) ;
 $mailError = !empty($Errors['mailEmpty']) || !empty($Errors['emailExisting']);
+$avatarError = !empty($Errors['avatarFormat']);
+
 ?>
 </p>
 
-<form method='post' action=''>
+<div class="row">
+<div class="col-xl-6 offset-xl-3 col-lg-8 offset-lg-2">
+
+<form enctype="multipart/form-data" method="post" action="">
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
@@ -85,12 +90,19 @@ $mailError = !empty($Errors['mailEmpty']) || !empty($Errors['emailExisting']);
     </div>
 
     <div class="form-group">
-		<label for="avatar" aria-label="Avatar" title="Avatar">Avatar</label>
-		<input type="file" class="form-control-file" name="avatar">
+		<label for="avatar" aria-label="Avatar" title="Avatar"><strong>Avatar</strong> (optionnel) 100px par 100px, l'image sera redimentionée si plus large</label>
+		<input type="file" name="fileUpload" class="form-control-file <?php echo $avatarError ? 'is-invalid' : '' ?>">
+        <?php echo !empty($Errors['avatarFormat']) ? '<div class="invalid-feedback">' . $Errors['avatarFormat'] . '</div>' : '' ?>
     </div>
    
-    <button type="submit" class="btn btn-primary ">Valider</button>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary ">Valider</button>
+    </div>
+    
 </form>
+
+</div>
+</div>
 
 <?php 
 }

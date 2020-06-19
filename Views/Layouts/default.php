@@ -25,13 +25,11 @@
 
 	<link rel="shortcut icon" href="<?php echo WEBROOT ?>favicon.png">
 
+	<!-- Bootstrap -->
 	<link rel="stylesheet" href="<?php echo WEBROOT ?>css/bootstrap.css">
-
+	
 	<link rel="stylesheet" href="<?php echo WEBROOT ?>css/style.css">
 
-	<!-- SCEditor CSS -->
-	<link rel="stylesheet" href="<?php echo WEBROOT ?>Vendor/SCEditor/minified/themes/modern.min.css" />
-	
 	</head>
 	<body>
 
@@ -40,7 +38,7 @@
 	<header>
 	
 		<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-			<a class="navbar-brand" href="/p5/">
+			<a class="navbar-brand" href=<?php echo WEBROOT ?>>
 				<svg class="bi bi-house-door-fill" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 					<path d="M6.5 10.995V14.5a.5.5 0 01-.5.5H2a.5.5 0 01-.5-.5v-7a.5.5 0 01.146-.354l6-6a.5.5 0 01.708 0l6 6a.5.5 0 01.146.354v7a.5.5 0 01-.5.5h-4a.5.5 0 01-.5-.5V11c0-.25-.25-.5-.5-.5H7c-.25 0-.5.25-.5.495z"/>
 					<path fill-rule="evenodd" d="M13 2.5V6l-2-2V2.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5z" clip-rule="evenodd"/>
@@ -52,13 +50,13 @@
 
 			<div class="collapse navbar-collapse" id="navbarsExampleDefault">
 				<ul class="navbar-nav mr-auto">
-					<?php if (CONNECTED)
+					<?php if (CONNECTED)					
+					/*
+					<img src="<?php echo WEBROOT . 'images/users/' . $User->getAvatarThumb() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
+					*/
 					{ ?>
 					<li class="nav-item active">
 						<a class="nav-link" href="<?php echo WEBROOT . 'users/page/' . $_SESSION["userContentId"] ?>" class="href">
-						<svg class="bi bi-person-lines-fill" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 100-6 3 3 0 000 6zm7 1.5a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zm2 9a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
-						</svg>
 						<?php echo $_SESSION["userName"] ?>
 						</a>
 					</li>
@@ -96,7 +94,7 @@
 
 		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-xl" role="document">
-				<div class="modal-content">
+				<div class="modal-content" style="background-color: black;">
 
 					<div class="modal-header">
 						<h4 class="modal-title w-100" id="myModalLabel"></h4>
@@ -120,7 +118,7 @@
 	</div>
 
 	<footer class="pt-5 text-center">
-		<p><small>&copy; 2016. Magazine Free HTML5. All Rights Reserverd. <br> Designed by <a href="http://freehtml5.co" target="_blank">FREEHTML5.co</a>  Demo Images: <a href="http://unsplash.com/" target="_blank">Unsplash</a></small></p>
+		<p><sm>&copy; 2020 - GM - OPC <br><a href="https://github.com/GuillaumeM-OPC/p5" target="_blank">GitHub</a></p>
 	</footer>
 
 	</div>
@@ -129,12 +127,10 @@
 	<script src="<?php echo WEBROOT ?>js/jquery.min.js"></script>
 	<!-- Bootstrap -->
 	<script src="<?php echo WEBROOT ?>js/bootstrap.min.js"></script>
-	<!-- SCEditor JS -->
-	<script src="<?php echo WEBROOT ?>Vendor/SCEditor/minified/sceditor.min.js"></script>
-	<script src="<?php echo WEBROOT ?>Vendor/SCEditor/minified/formats/bbcode.js"></script>
 	<!-- Main JS -->
 	<script src="<?php echo WEBROOT ?>js/main.js"></script>
-	
+	<!-- Tinymce -->
+	<script src="https://cdn.tiny.cloud/1/1jvbu1nyy3wtq3lmicqy92cn8205iug5b3lroymocjyc2kgz/tinymce/5/tinymce.min.js" referrerpolicy="origin"/></script>
 
 	</body>
 </html>

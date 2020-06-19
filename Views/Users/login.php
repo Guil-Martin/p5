@@ -5,11 +5,14 @@ if (!CONNECTED) {
 <h2 class="text-center">Connexion</h2>
 <p class="text-center">
 <?php
-$nameError = !empty($Errors['nameLen']) || !empty($Errors['nameEmpty']) || !empty($Errors['nameExisting']);
+$nameError = !empty($Errors['nameLen']) || !empty($Errors['nameEmpty']) || !empty($Errors['noUser']);
 $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']) || !empty($Errors['passWrong']);
 
 ?>
 </p>
+
+<div class="row">
+<div class="col-xl-6 offset-xl-3 col-lg-8 offset-lg-2">
 
 <form method='post' action=''>
 
@@ -25,6 +28,7 @@ $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']) || !empt
         name="uName" id="uName" <?php echo !empty($Data['userName']) ? 'value="' . $Data['userName'] . '"' : 'placeholder="Nom"' ?>>
         <?php echo !empty($Errors['nameLen']) ? '<div class="invalid-feedback">' . $Errors['nameLen'] . '</div>' : '' ?>
         <?php echo !empty($Errors['nameEmpty']) ? '<div class="invalid-feedback">' . $Errors['nameEmpty'] . '</div>' : '' ?>
+        <?php echo !empty($Errors['noUser']) ? '<div class="invalid-feedback">' . $Errors['noUser'] . '</div>' : '' ?>
     </div>
 
     <div class="input-group mb-3">
@@ -44,8 +48,13 @@ $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']) || !empt
         <?php echo !empty($Errors['passWrong']) ? '<div class="invalid-feedback">' . $Errors['passWrong'] . '</div>' : '' ?>
     </div>
    
-    <button type="submit" class="btn btn-primary ">Valider</button>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary ">Valider</button>
+    </div>
 </form>
+
+</div>
+</div>
 
 <?php 
 }
