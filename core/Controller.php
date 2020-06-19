@@ -32,13 +32,24 @@
             }
         }
 
-        public function isUserPageOwner($userContentId)
+        public function isUserPageOwner($user)
         { // Check is the current user page is owned by this user
           // and thus has the right to access moderating tools
-            if (isset($_SESSION['userContentId'])) {
-                return $_SESSION['userContentId'] === $userContentId;
+            $valid = false;
+            if (CONNECTED) {
+                $valid = !empty($user) && $_SESSION['userId'] === $user->getId();
+                $valid = !empty($user) && $_SESSION['userContentId'] === $user->getContentId();
             }
-            return false;
+            return $valid;
+        }
+
+        public function isUserOwner($id)
+        { // Check if the id correspond to the connected user one
+            $valid = false;
+            if (CONNECTED) {
+                $valid = $_SESSION['userId'] === $id;
+            }
+            return $valid;
         }
 
         protected function secure_form($form)
@@ -54,7 +65,7 @@
         {
             $data = trim($data);
             $data = stripslashes($data);
-            $data = htmlspecialchars($data);
+            $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8', true);
             return $data;
         }
 
@@ -187,8 +198,8 @@
                 '<blockquote><strong>$1:</strong><br>$2</blockquote>',
                 '<blockquote>$1</blockquote>',
                 '<a href="$1">$2</a>',
-                '<img src="$1" alt="$2">',
-                '<img src="$1">',
+                '<img class="img-fluid" src="$1" alt="$2">',
+                '<img class="img-fluid" src="$1">',
                 '<iframe src="https://www.youtube-nocookie.com/embed/$1" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
                 '<ul>$1</ul>',
                 '<ol>$1</ol>',
