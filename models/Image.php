@@ -13,6 +13,7 @@ class Image
     $_content,
     $_thumbnail,
     $_image,
+    $_views,
     $_likes,
     $_numComments,
     $_datePosted,
@@ -41,8 +42,9 @@ class Image
     public function setExcerpt($var)       { $var = (string) $var;  $this->_excerpt = $var; }
     public function setImgContent($var)    { $var = (string) $var;  $this->_content = $var; }
     public function setImage($var)         { $var = (string) $var;  $this->_image = $var; }
+    public function setViews($var)         { $var = (int) $var; $this->_views = $var; }
     public function setLikes($var)         { $var = (int) $var; $this->_likes = $var; }
-    public function setNumComments($var)   { $var = (int) $var; $this->_numComments = $var; }
+    public function setComments($var)      { $var = (int) $var; $this->_numComments = $var; }
     public function setDatePosted($var)    { $this->_datePosted = $var; }
     public function setDateEdited($var)    { $this->_dateEdited = $var; }
     /////////////////////////
@@ -58,8 +60,9 @@ class Image
     public function getExcerpt()           { return $this->_excerpt; }
     public function getImgContent()        { return $this->_content; }
     public function getImage()             { return $this->_image; }
+    public function getViews()             { return $this->_views; }
     public function getLikes()             { return $this->_likes; }
-    public function getNumComments()       { return $this->_numComments; }
+    public function getComments()          { return $this->_numComments; }
     public function getDatePosted()        { return $this->_datePosted; }
     public function getDateEdited()        { return $this->_dateEdited; }
     /////////////////////////

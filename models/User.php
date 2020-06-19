@@ -5,6 +5,9 @@ class User
     $_id,
     $_contentId,
     $_privilege,
+    $_bio,
+    $_avatar,
+    $_avatarThumb,
     $_name,
     $_password,
     $_email,
@@ -28,6 +31,9 @@ class User
     public function setId($var)             { $var = (int) $var; $this->_id = $var; }
     public function setContentId($var)      { $var = (string) $var;  $this->_contentId = $var; }
     public function setPrivilege($var)      { $var = (string) $var;  $this->_privilege = $var; }
+    public function setBio($var)            { $var = (string) $var;  $this->_bio = $var; }
+    public function setAvatar($var)         { $var = (string) $var;  $this->_avatar = $var; }
+    public function setAvatarThumb($var)    { $var = (string) $var;  $this->_avatarThumb = $var; }
     public function setUserName($var)       { $var = (string) $var;  $this->_name = $var; }
     public function setUserPassword($var)   { $var = (string) $var;  $this->_password = $var; }
     public function setUserMail($var)       { $var = (string) $var;  $this->_email = $var; }
@@ -40,6 +46,9 @@ class User
     public function getId()                { return $this->_id; }
     public function getContentId()         { return $this->_contentId; }
     public function getPrivilege()         { return $this->_privilege; }
+    public function getBio()               { return $this->_bio; }
+    public function getAvatar()            { return $this->_avatar; }
+    public function getAvatarThumb()       { return $this->_avatarThumb; }
     public function getUserName()          { return $this->_name; }
     public function getUserPassword()      { return $this->_password; }
     public function getUserMail()          { return $this->_email; }

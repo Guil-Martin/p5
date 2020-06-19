@@ -7,14 +7,37 @@ class UserManager extends Model
     public function registerUser($user)
     { // Register user in the member database
         $sql = "INSERT INTO " . DB_USERS . "
-        (contentId, userName, userPassword, userMail, dateRegistered)
+        (contentId, userName, avatar, bio, userPassword, userMail, dateRegistered)
         VALUES
-        (:contentId, :userName, :userPassword, :userMail, NOW())";
+        (:contentId, :userName, :avatar, :bio, :userPassword, :userMail, NOW())";
 
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':contentId', $user->getContentId(), PDO::PARAM_STR);
         $req->bindValue(':userName', $user->getUserName(), PDO::PARAM_STR);
+        $req->bindValue(':avatar', $user->getAvatar(), PDO::PARAM_STR);
+        $req->bindValue(':bio', '', PDO::PARAM_STR);
         $req->bindValue(':userMail', $user->getUserMail(), PDO::PARAM_STR);
+        $req->bindValue(':userPassword', $user->getUserPassword(), PDO::PARAM_STR);
+
+        $req->execute();
+        //var_dump($req->errorInfo());
+
+        return $req->rowCount() > 0;
+    }
+
+    public function updateUser($user)
+    { // Register user in the member database
+
+        //var_dump($user);
+
+        $sql = "UPDATE " . DB_USERS . " 
+        SET avatar = :avatar, bio = :bio, userPassword = :userPassword
+        WHERE id = :id";
+
+        $req = Database::getBdd()->prepare($sql);
+        $req->bindValue(':id', $user->getId(), PDO::PARAM_INT);
+        $req->bindValue(':bio', $user->getBio(), PDO::PARAM_STR);
+        $req->bindValue(':avatar', $user->getAvatar(), PDO::PARAM_STR);
         $req->bindValue(':userPassword', $user->getUserPassword(), PDO::PARAM_STR);
 
         return $req->execute();
@@ -45,71 +68,15 @@ class UserManager extends Model
     }
     ///////
 
-    /////// COMMENTS
-    public function showComments($ID)
-    { // Returns comments on the article
-        $sql = "SELECT * FROM comments WHERE newsID = ? ORDER BY datePosted DESC";
+    function getNum($userId, $toCount, $db) 
+    {
+        $sql = "SELECT SUM(" . $toCount . ") as total FROM " . $db . " WHERE userId = :userId";
         $req = Database::getBdd()->prepare($sql);
-
-        $req->execute([$ID]);
-        //$arr = $req->errorInfo(); print_r($arr);
-
-        $comments = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
-        {   
-            $comments[] = new Comment($data);
-        }
-
-        return (!empty($comments)) ? $comments : null; 
-    }
-
-    public function countComments($ID)
-    { // Returns the total number of comments for this article
-        $sql = "SELECT COUNT(*) as total FROM comments WHERE ID = :id";
-        $req = Database::getBdd()->prepare($sql);
-
-        $req->bindValue(':id', $ID, PDO::PARAM_INT);
-    
+        $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
-
-        $data = $req->fetch(PDO::FETCH_ASSOC);
-
-        return (int) $data['total']; 
+        $num = $req->fetch(PDO::FETCH_ASSOC);
+        return (int) $num['total'];
     }
 
-    public function createComment($data)       
-    { // Creates a comment on the article
-
-        // Creates a comment object to add it to the db
-        $comment = new Comment($data);
-
-        $sql = "INSERT INTO comments
-        (author, content, newsID, datePosted)
-        VALUES
-        (:author, :content, :newsID, NOW())";
-
-        $req = Database::getBdd()->prepare($sql);
-        
-        $req->bindValue(':author', $comment->getAuthor());
-        $req->bindValue(':content', $comment->getContent());
-        $req->bindValue(':newsID', $comment->getNewsID());
-
-        $req->execute();
-
-        // set id
-        $comment->setID(Database::getBdd()->lastInsertId());
-    }
-
-    public function addReportOnComment($data)       
-    { // Adds a report to the total of report on the comment
-
-        $ID = (int) $data[0];
-        $newsID = (int) $data[1];
-
-        $sql =  "UPDATE comments SET reports = reports + 1 WHERE ID = ? AND newsID = ?";
-        $req = Database::getBdd()->prepare($sql);
-        return $req->execute([$ID, $newsID]);
-    }
-    ///////
 
 }

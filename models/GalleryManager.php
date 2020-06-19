@@ -21,19 +21,45 @@ class GalleryManager extends Model
         
         $req->execute();
 
-        var_dump($req->errorInfo());
+        return $req->rowCount() > 0;
+    }
+
+    public function galleryUpdate($image)
+    { // Update an image
+
+        //var_dump($image);
+
+        $sql = "UPDATE " . DB_IMG . " SET
+        imgTitle = :imgTitle, imgContent = :imgContent, imgPath = :imgPath, imgThumbnail = :imgThumbnail, dateEdited = NOW()
+        WHERE
+        id = :imgId";
+
+        $req = Database::getBdd()->prepare($sql);
+
+        $req->bindValue(':imgId', $image->getId(), PDO::PARAM_INT);
+        $req->bindValue(':imgTitle', $image->getImgTitle(), PDO::PARAM_STR);
+        $req->bindValue(':imgContent', $image->getImgContent(), PDO::PARAM_STR);
+        $req->bindValue(':imgPath', $image->getImgPath(), PDO::PARAM_STR); 
+        $req->bindValue(':imgThumbnail', $image->getImgThumbnail(), PDO::PARAM_STR);      
+
+        $req->execute();
+
+        //var_dump($req->errorInfo());
         
         return $req->rowCount() > 0;
     }
 
     public function getGallery($userId, $offset = 1)
     { // Return offset number of image objects
-        $offset = $offset * IMAGES_PER_PAGE;
+        
+        $numPerPage = IMAGES_PER_PAGE;
+        $offset = (($offset - 1) * $numPerPage);
 
-        $sql = "SELECT * FROM " . DB_IMG . " WHERE userId = :userId ORDER BY datePosted DESC LIMIT :offset";
+        $sql = "SELECT * FROM " . DB_IMG . " WHERE userId = :userId ORDER BY datePosted DESC LIMIT :offset, :numElts";
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $req->bindValue(':numElts', $numPerPage, PDO::PARAM_INT);
         $req->execute();
 
         $image = [];
@@ -44,11 +70,11 @@ class GalleryManager extends Model
         return $image;
     }
 
-    public function getImageContent($imgId)
+    public function getImageContent($postId)
     { // Displays single image content
         $sql = "SELECT * FROM " . DB_IMG . " WHERE id = :id";
         $req = Database::getBdd()->prepare($sql);
-        $req->bindValue(':id', $imgId, PDO::PARAM_INT);
+        $req->bindValue(':id', $postId, PDO::PARAM_INT);
         $req->execute();
 
         $image = [];
@@ -60,22 +86,31 @@ class GalleryManager extends Model
         return $image;
     }
 
-    public function countImages($userId)
+    public function numElt($userId, $toCount = '*')
     { // Returns the total number of images in the database
-        $sql = "SELECT COUNT(*) as total FROM " . DB_IMG . " WHERE userId = :userId";
+        $sql = "SELECT COUNT(" . $toCount . ") as total FROM " . DB_IMG . " WHERE userId = :userId";
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
-        return $req->fetch(PDO::FETCH_ASSOC);
+        $num = $req->fetch(PDO::FETCH_ASSOC);
+        return (int) $num['total'];
     }
 
-    public function likeImage($imgId, $userId)
+    public function addOne($postId, $to = 'views', $minus='+')
+    { // Add 1 in the specified col
+        $sql = "UPDATE " . DB_IMG . " SET ".$to." = ".$to." ".$minus." 1 WHERE id = :postId";
+        $req = Database::getBdd()->prepare($sql);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
+        $req->execute();
+    }
+
+    public function likeImage($postId, $userId)
     { // Returns the total number of images in the database
         $db = Database::getBdd();
 
-        $sql = "SELECT 1 FROM ". DB_IMG_LIKES . " WHERE imgId = :imgId AND userId = :userId";
+        $sql = "SELECT 1 FROM ". DB_IMG_LIKES . " WHERE postId = :postId AND userId = :userId";
         $req =  $db->prepare($sql);
-        $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
         $exist = (bool) $req->fetch();
@@ -83,82 +118,73 @@ class GalleryManager extends Model
         if (!$exist) 
         { 
             $sql = "INSERT INTO " . DB_IMG_LIKES . " 
-            (imgId, userId)
+            (postId, userId)
             VALUES
-            (:imgId, :userId)";
+            (:postId, :userId)";
     
             $req = $db->prepare($sql);
-            $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+            $req->bindValue(':postId', $postId, PDO::PARAM_INT);
             $req->bindValue(':userId', $userId, PDO::PARAM_INT);  
             $req->execute();
 
             if ($req->rowCount() > 0) {
-                $sql = "UPDATE " . DB_IMG . " SET likes = likes + 1 WHERE id = :imgId";
+                $sql = "UPDATE " . DB_IMG . " SET likes = likes + 1 WHERE id = :postId";
                 $req = $db->prepare($sql);
-                $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+                $req->bindValue(':postId', $postId, PDO::PARAM_INT);
                 $req->execute();
             }        
         } 
         else
         { // Already exists -> dislike by deleting the row
-            $sql = "DELETE FROM " . DB_IMG_LIKES . " WHERE imgId = :imgId";
+            $sql = "DELETE FROM " . DB_IMG_LIKES . " WHERE postId = :postId";
             $req = $db->prepare($sql);
-            $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+            $req->bindValue(':postId', $postId, PDO::PARAM_INT);
             $req->execute();
 
             if ($req->rowCount() > 0)  {
-                $sql = "UPDATE " . DB_IMG . " SET likes = likes - 1 WHERE id = :imgId";
+                $sql = "UPDATE " . DB_IMG . " SET likes = likes - 1 WHERE id = :postId";
                 $req = $db->prepare($sql);
-                $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+                $req->bindValue(':postId', $postId, PDO::PARAM_INT);
                 $req->execute();
             }            
         }
     }
     
-    public function liked($imgId, $userId)
+    public function liked($postId, $userId)
     { // Returns if the image is liked by this user
-        $sql = "SELECT 1 FROM " . DB_IMG_LIKES . " WHERE imgId = :imgId AND userId = :userId";
+        $sql = "SELECT 1 FROM " . DB_IMG_LIKES . " WHERE postId = :postId AND userId = :userId";
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_STR);
-        $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
         $req->execute();
         return (bool) $req->fetch();
     }
 
-    /////// COMMENTS
-    public function createComment($comment)       
-    { // Creates a comment on the image
-        $sql = "INSERT INTO " . DB_COMMENTS_IMG . "
-        (imgId, userName, commentContent, datePosted)
-        VALUES 
-        (:imgId, :userName, :commentContent, NOW())";
+    public function deleteImage($postId)
+    { // Returns comments on the image
+        $db = Database::getBdd();
 
-        $req = Database::getBdd()->prepare($sql);
-        
-        $req->bindValue(':imgId', $comment->getPostId(), PDO::PARAM_INT);
-        $req->bindValue(':userName', $comment->getUserName(), PDO::PARAM_STR);
-        $req->bindValue(':commentContent', $comment->getCommentContent(), PDO::PARAM_STR);    
+        $sql = "DELETE FROM " . DB_COMMENTS_IMG_LIKES . " WHERE postId = :postId";
+        $req = $db->prepare($sql);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
+        $req->execute();
+
+        $sql = "DELETE FROM " . DB_COMMENTS_IMG . " WHERE postId = :postId";
+        $req = $db->prepare($sql);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
+        $req->execute();
+
+        $sql = "DELETE FROM " . DB_IMG_LIKES . " WHERE postId = :postId";
+        $req = $db->prepare($sql);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
+        $req->execute();  
+
+        $sql = "DELETE FROM " . DB_IMG . " WHERE id = :postId";
+        $req = $db->prepare($sql);
+        $req->bindValue(':postId', $postId, PDO::PARAM_INT);
         $req->execute();
 
         return $req->rowCount() > 0;
     }
-
-    public function getComments($imgId)
-    { // Returns comments on the image
-        $sql = "SELECT * FROM ". DB_COMMENTS_IMG . " WHERE imgId = :imgId ORDER BY datePosted DESC";
-        $req = Database::getBdd()->prepare($sql);
-
-        $req->bindValue(':imgId', $imgId, PDO::PARAM_INT);
-
-        $req->execute();
-
-        $comments = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
-        {   
-            $comments[] = new Comment($data);
-        }
-
-        return (!empty($comments)) ? $comments : null; 
-    }
-
+    
 }
