@@ -34,7 +34,7 @@ class Comment
     public function setCommentContent($var){ $var = (string) $var;  $this->_content = $var; }
     public function setDatePosted($var)    { $this->_datePosted = $var; }
     public function setDateEdited($var)    { $this->_dateEdited = $var; }
-    public function setLikes($var)         { $var = (int) $var; $this->_likes = $var; }
+    public function setLikes($var)         { $var = $var; $this->_likes = $var; }
     public function setWhoLikedId($var)    { $var = (int) $var; $this->_whoLikedId = $var; }
     public function setReports($var)       { $var = (int) $var; $this->_reports = $var; }
     /////////////////////////

@@ -17,7 +17,6 @@ $nameError = !empty($Errors['nameLen']) || !empty($Errors['nameEmpty']) || !empt
 $passError = !empty($Errors['passLen']) || !empty($Errors['passEmpty']);
 $passVerifyError = !empty($Errors['passVerify']) || !empty($Errors['passVerifyEmpty']) ;
 $mailError = !empty($Errors['mailEmpty']) || !empty($Errors['emailExisting']);
-$avatarError = !empty($Errors['avatarFormat']);
 
 ?>
 </p>
@@ -87,12 +86,6 @@ $avatarError = !empty($Errors['avatarFormat']);
         name="uMail" id="uMail" <?php echo !empty($Data['userMail']) ? 'value="' . $Data['userMail'] . '"' : 'placeholder="E-mail"' ?>>
         <?php echo !empty($Errors['mailEmpty']) ? '<div class="invalid-feedback">' . $Errors['mailEmpty'] . '</div>' : '' ?>
         <?php echo !empty($Errors['emailExisting']) ? '<div class="invalid-feedback">' . $Errors['emailExisting'] . '</div>' : '' ?>
-    </div>
-
-    <div class="form-group">
-		<label for="avatar" aria-label="Avatar" title="Avatar"><strong>Avatar</strong> (optionnel) 100px par 100px, l'image sera redimentionée si plus large</label>
-		<input type="file" name="fileUpload" class="form-control-file <?php echo $avatarError ? 'is-invalid' : '' ?>">
-        <?php echo !empty($Errors['avatarFormat']) ? '<div class="invalid-feedback">' . $Errors['avatarFormat'] . '</div>' : '' ?>
     </div>
    
     <div class="d-flex justify-content-center">

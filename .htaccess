@@ -1,2 +1,4 @@
-RewriteEngine on
-RewriteRule ^([a-zA-Z0-9\-\_\/]*)$ Webroot/$1
+RewriteEngine On
+RewriteBase /p5
+RewriteCond $1 !^(index\.php|assets/images|assets/css|assets/js|assets/favicon|robots\.txt)
+RewriteRule ^(.+) index.php?url=$l [QSA,L]

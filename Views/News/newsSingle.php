@@ -2,15 +2,6 @@
 
 <?php 
 
-function shortNumber($num) 
-{
-    $units = ['', 'K', 'M', 'B', 'T'];
-    for ($i = 0; $num >= 1000; $i++) {
-        $num /= 1000;
-    }
-    return round($num, 1) . $units[$i];
-}
-
 $commentContentError = !empty($Errors['commentContentEmpty']) || !empty($Errors['commentContentLen']);
 
 if (!empty($News)) {
@@ -25,7 +16,7 @@ if (!empty($News)) {
     <div class = "row border-bottom border-light">
         <div class = "col text-center mt-3 mb-3">
             <div class="">
-                <img width="25" height="25" src="<?php echo WEBROOT . 'images/users/' . $Author->getAvatar() ?>" alt="<?php echo $Author->getUserName() ?>" class="img-fluid">
+                <img width="25" height="25" src="<?php echo WEBROOT . 'assets/images/users/' . $Author->getAvatar() ?>" alt="<?php echo $Author->getUserName() ?>" class="img-fluid">
                 <small>Posté par : <a href="<?php echo WEBROOT . 'users/page/' . $Author->getContentId() ?>"><?php echo $Author->getUserName() ?></a></small>
             </div>            
             <small class="">Posté le <?php echo date("d/m/Y à H:i", strtotime($News->getDatePosted())) ?></small>
@@ -47,7 +38,7 @@ if (!empty($News)) {
                             <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                             </svg>
                         </span>
-                        <span class="pr-2 pl-1"><?php echo shortNumber($News->getLikes()) ?></span>
+                        <span class="pr-2 pl-1"><?php echo $News->getLikes() ?></span>
                     
 
                     <?php
@@ -76,7 +67,7 @@ if (!empty($News)) {
             if (empty($Owner) && !empty($User)) {?>
 
                 <div class="userName mt-2 mb-2">
-                    <img width="25px" height="25px" src="<?php echo WEBROOT . 'images/users/' . $User->getAvatar() ?>" alt="<?php echo $User->getUserName() ?>" class="img-fluid">
+                    <img width="25px" height="25px" src="<?php echo WEBROOT . 'assets/images/users/' . $User->getAvatar() ?>" alt="<?php echo $User->getUserName() ?>" class="img-fluid">
                     <a class="pl-2" href="<?php echo WEBROOT . 'users/page/' . $User->getContentId() ?>" class="href">
                     <?php echo $User->getUserName() ?>
                     </a>
@@ -171,16 +162,14 @@ if (!empty($News)) {
                 <div class="commentBox border border-light bg-dark p-2 mt-2">
 
                     <div class="userName">
-                        <img width="25px" height="25px" src="<?php echo WEBROOT . 'images/users/' . $com["avatar"] ?>" alt="<?php echo $com["userName"] ?>" class="img-fluid">
+                        <img width="25px" height="25px" src="<?php echo WEBROOT . 'assets/images/users/' . $com["avatar"] ?>" alt="<?php echo $com["userName"] ?>" class="img-fluid">
                         <a class="pl-2" href="<?php echo WEBROOT . 'users/page/' . $com['contentId'] ?>" class="href">
                         <?php echo $com["userName"] ?>
                         </a>
                         <div class=""><small>Posté le <?php echo date("d/m/Y à H:i", strtotime($com['datePosted'])) ?></small></div>
                     </div>                 
 
-                    <div class="pl-2 mt-2" style="white-space: pre-wrap;"><?php echo $com['commentContent'] ?></div>
-
-
+                    <div class="pl-2 mt-2 commentContent"><?php echo $com['commentContent'] ?></div>
 
                     <div class="d-flex mt-2">
                         <div class="ml-auto">
@@ -192,7 +181,7 @@ if (!empty($News)) {
                                         <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                                         </svg>
                                     </span>
-                                    <span class="pr-2 pl-1"><?php echo shortNumber($com['likes']) ?></span>
+                                    <span class="pr-2 pl-1"><?php echo $com['likes'] ?></span>
                                 
 
                                 <?php

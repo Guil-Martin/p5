@@ -1,26 +1,16 @@
 <?php
 
-require_once(ROOT . 'Models/NewsManager.php');
-require_once(ROOT . 'Models/News.php');
-require_once(ROOT . 'Models/UserManager.php');
-require_once(ROOT . 'Models/User.php');
-require_once(ROOT . 'Models/CommentManager.php');
-require_once(ROOT . 'Models/Comment.php');
-
 class newsController extends Controller
 {
 
-    function newsCreate(...$ids)
+    public function newsCreate(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]))
         { // User ID parameter went trough
           // Secure url input
             $userId = (int) $ids[0];
-
-            require_once(ROOT . 'Models/UserManager.php');                                        
-            require_once(ROOT . 'Models/User.php');
 
             $userManager = new UserManager();
             $user = $userManager->getUserInfoBy($ids[0], 'Id');
@@ -28,11 +18,11 @@ class newsController extends Controller
             if (!empty($user))
             {
                 $validUser = $this->isUserPageOwner($user);
-                $d['Owner'] = $validUser;
+                $data['Owner'] = $validUser;
 
                 if ($validUser) {
 
-                    $d['User'] = $user;
+                    $data['User'] = $user;
 
                     if (isset($_POST["postTitle"]))
                     {                
@@ -67,8 +57,6 @@ class newsController extends Controller
 
                         if (empty($errors)) 
                         { // If everything is good, post news
-                            require_once(ROOT . 'Models/NewsManager.php');
-                            require_once(ROOT . 'Models/News.php');
                             $newsManager = new NewsManager();
 
                             // Fill missing info about the user, author of this news
@@ -79,27 +67,27 @@ class newsController extends Controller
 
                             if ($newsManager->newsCreate($news))
                             { // Should succeed if userId valid
-                                $d['Success'] = 'Nouvelle postée avec succès';
+                                $data['Success'] = 'Nouvelle postée avec succès';
                             }
                         }
 
                         $formD = $this->secure_form($formD);
                         
-                        $d['Data'] = $formD;
-                        $d['Errors'] = $errors;
+                        $data['Data'] = $formD;
+                        $data['Errors'] = $errors;
 
                     }                    
                 }
             }
         }
         
-        $this->set($d);
+        $this->set($data);
         $this->render("newsCreate", true);
     }
 
-    function newsEdit(...$ids)
+    public function newsEdit(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -111,10 +99,10 @@ class newsController extends Controller
 
             if (!empty($user))
             {
-                $d['User'] = $user;
+                $data['User'] = $user;
 
                 $validUser = $this->isUserPageOwner($user);
-                $d['Owner'] = $validUser;
+                $data['Owner'] = $validUser;
 
                 if ($validUser) {
 
@@ -124,7 +112,7 @@ class newsController extends Controller
                     if (!empty($news[0])) {
                         $news = $news[0];
 
-                        $d['News'] = $news;
+                        $data['News'] = $news;
 
                         $formD['author'] = $news->getAuthor();
                         $formD['title'] = $news->getNewsTitle();
@@ -177,24 +165,24 @@ class newsController extends Controller
                             }
                         }
                         
-                        $d['Errors'] = $errors;
+                        $data['Errors'] = $errors;
 
                     }
                     
                     $formD = $this->secure_form($formD);
-                    $d['Data'] = $formD;
+                    $data['Data'] = $formD;
                 }
             }
         }
         
-        $this->set($d);
+        $this->set($data);
         $this->render("newsEdit", true);
     }
 
-    function news(...$ids)
+    public function news(...$ids)
     { // AJAX
 
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]))
         { // User ID parameter went trough
@@ -221,30 +209,37 @@ class newsController extends Controller
                 $count = $newsManager->numElt($userId);               
                 $numPerPage = NEWS_PER_PAGE; // Number of posts on the page
                 $numPages = ceil($count / $numPerPage);
-                $d['NumPages'] = $numPages;
-                $d['CurrentPage'] = 1;
+                $data['NumPages'] = $numPages;
+                $data['CurrentPage'] = 1;
 
                 $page = $page > $numPages ? $numPages : $page; // Page max?
-                $d['CurrentPage'] = $page;     
+                $data['CurrentPage'] = $page;     
 
                 $news = $newsManager->getNews($user->getId(), $page);
 
+                foreach ($news as $key => $value) 
+                { // Compact numbers
+                    $news[$key]->setComments($this->shortNumber($news[$key]->getComments()));
+                    $news[$key]->setLikes($this->shortNumber($news[$key]->getLikes()));
+                    $news[$key]->setViews($this->shortNumber($news[$key]->getViews()));
+                }
+
                 if (!empty($news))
                 { // News existing
-                    $d['News'] = $news;
+                    $data['News'] = $news;
                 }
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user);
+                $data['User'] = $user;
+                $data['Owner'] = $this->isUserPageOwner($user);
             }
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("news", true);
     }
 
-    function newsSingle(...$ids)
+    public function newsSingle(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]))
         { // News ID parameter went trough
@@ -265,26 +260,31 @@ class newsController extends Controller
                 // Convert BBcode
                 //$news->setNewsContent($this->ParseBBCode($news->getNewsContent()));
 
+                // Compact numbers
+                $news->setComments($this->shortNumber($news->getComments()));
+                $news->setLikes($this->shortNumber($news->getLikes()));
+                $news->setViews($this->shortNumber($news->getViews()));
+
                 // Get author user data
                 $author = $userManager->getUserInfoBy($news->getUserId(), 'id');
                 
                 if (!empty($author))
                 { // Author data found
-                    $d['Author'] = $author;
-                    $d['News'] = $news;                    
+                    $data['Author'] = $author;
+                    $data['News'] = $news;                    
 
                     $commentManager = new CommentManager();
                     
                     if (CONNECTED) 
                     { // Get user data if connected
 
-                        $d['Owner'] = $this->isUserPageOwner($author);
+                        $data['Owner'] = $this->isUserPageOwner($author);
 
                         $user = $userManager->getUserInfoBy($_SESSION['userId'], 'id');
                         if (!empty($user))
                         {
-                            $d['User'] = $user;
-                            $d['NewsLiked'] = $newsManager->liked($news->getId(), $user->getId());
+                            $data['User'] = $user;
+                            $data['NewsLiked'] = $newsManager->liked($news->getId(), $user->getId());
                             
                             ///// Form comment
                             if (isset($_POST['msgContent']))
@@ -322,8 +322,8 @@ class newsController extends Controller
                                     }
                                 }
 
-                                $d['Data'] = $formD;
-                                $d['Errors'] = $errors;
+                                $data['Data'] = $formD;
+                                $data['Errors'] = $errors;
 
                             }
                             /////
@@ -344,19 +344,20 @@ class newsController extends Controller
                         foreach ($comments as $key => $com) {
                             // Secure data
                             $comments[$key]['commentContent'] = $this->secure_input($com['commentContent']);
+                            $comments[$key]['likes'] = $this->shortNumber($comments[$key]['likes']);
                         }
-                        $d['Comments'] = $comments;
+                        $data['Comments'] = $comments;
                     }
 
                 }
             }
         }
         
-        $this->set($d);
+        $this->set($data);
         $this->render("newsSingle", true);
     }
     
-    function likeNews(...$ids)
+    public function likeNews(...$ids)
     { // AJAX
         if (CONNECTED) 
         { // Check if connected and if the id correspond to the session variable
@@ -377,7 +378,7 @@ class newsController extends Controller
         }        
     }
 
-    function delPost(...$ids)
+    public function delPost(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -397,7 +398,7 @@ class newsController extends Controller
     }
 
     ///// Comment
-    function likeComment(...$ids)
+    public function likeComment(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -416,7 +417,7 @@ class newsController extends Controller
         }    
     }
 
-    function delComment(...$ids)
+    public function delComment(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {

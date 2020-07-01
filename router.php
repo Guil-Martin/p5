@@ -2,39 +2,79 @@
 
 class Router
 {
+    private $url = '';
+    private $controller = '';
+    private $action = '';
+    private $params = [];
 
-    static public function parse($url, $request)
+    private $RouteControllers = [
+        'home',
+        'gallery',        
+        'news',
+        'users'
+    ];
+
+    public function dispatch() 
     {
+        // Get server URL
+        $this->url = $_SERVER["REQUEST_URI"];
+       
+        $this->url = trim($this->url);           
+        $explode_url = explode('/', $this->url);
+        $explode_url = array_slice($explode_url, 2);
 
-        $url = trim($url);
+        // Controller
+        if (!empty($explode_url[0]))
+        {
+            $this->controller = $explode_url[0];
+            
+            if (in_array($this->controller, $this->RouteControllers)) 
+            {
+                $this->controller = $this->loadController();
 
-        if ($url == WEBROOT)
-        { // Page by default
-            $request->controller = "home";
-            $request->action = "index";
-            $request->params = [];
-        }
-        else
-        { // Explode URL to get the controller, action and parameters to be handled by the dispatcher
-            $explode_url = explode('/', $url);
+                // Action
+                if (!empty($this->controller) && !empty($explode_url[1])) 
+                { // If controller file is charged and the action exists
 
-            // shorten the array
-            $explode_url = array_slice($explode_url, 2);
+                    $this->action = $explode_url[1];
 
-            $request->controller = $explode_url[0];
-            $actionExist = isset($explode_url[1]) && !empty($explode_url[1]);
-            if ($actionExist) 
-            { 
-                $request->action = $explode_url[1]; 
+                    if (method_exists($this->controller, $this->action))
+                    { // If method of name action exists on the controller
+                        
+                        // Optional parameters
+                        $this->params = array_slice($explode_url, 2);
+                        
+                        spl_autoload_register(function ($class) {
+                            require_once(ROOT . "Models/$class.php");
+                        });
+
+                        call_user_func_array([$this->controller, $this->action], $this->params);
+                        return;                       
+                    }
+                }
             }
-            else 
-            { 
-                $request->action = 'index'; 
-            }
-
-            // get parameters if they exist
-            $request->params = array_slice($explode_url, 2);
-
         }
+
+        // Default index page
+        $this->controller = "home";
+        $this->controller = $this->loadController();
+        $this->action = "index";
+        $this->params = [];
+        call_user_func_array([$this->controller, $this->action], $this->params);
+        //require_once(ROOT . 'Views/404.php');
     }
+
+    private function loadController() 
+    { // Set up the controller        
+        $name = $this->controller . 'Controller';
+        $file = ROOT . 'Controllers/' . $name . '.php';
+        if (file_exists($file))
+        { // If file exists, declare the class controller
+            require_once($file);
+            $controller = new $name();
+            return $controller;
+        }
+        return null;
+    }
+
 }

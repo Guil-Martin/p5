@@ -3,7 +3,7 @@
 class HomeManager extends Model
 {
 
-    function getFiltered($db, $period, $number, $order, $offset = 1)
+    public function getFiltered($db, $period, $number, $order, $offset = 1)
     {
         $numPerPage = $db == DB_NEWS ? NEWS_PER_PAGE : IMAGES_PER_PAGE;
         $offset = (($offset - 1) * $numPerPage);
@@ -26,17 +26,15 @@ class HomeManager extends Model
         $req->bindValue(':offset', $offset, PDO::PARAM_INT);
         $req->bindValue(':numElts', $numPerPage, PDO::PARAM_INT);
 
-        //var_dump($sql);
-
         $req->execute();
-        
-        //var_dump($req->errorInfo());
 
         $posts = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+
+        while ($data = $req->fetch()) 
         { 
-            $posts[] = $data; // new Image($data); 
+            $posts[] = $data;
         }
+
         return $posts;
     }
 
@@ -45,11 +43,11 @@ class HomeManager extends Model
         $sql = "SELECT COUNT(" . $toCount . ") as total FROM " . $db;
         $req = Database::getBdd()->prepare($sql);
         $req->execute();
-        $num = $req->fetch(PDO::FETCH_ASSOC);
+        $num = $req->fetch();
         return (int) $num['total'];
     }
 
-    function getPostMost($db, $orderBy) 
+    public function getPostMost($db, $orderBy) 
     {
 
         $sql = "SELECT " . $db . ".*, 
@@ -66,7 +64,7 @@ class HomeManager extends Model
         $req->execute();
 
         $posts = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         {
             $posts[] = $data;//new News($data);
         }
@@ -76,7 +74,7 @@ class HomeManager extends Model
         return $posts;
     }
 
-    function getImgMost($db, $orderBy)
+    public function getImgMost($db, $orderBy)
     {
         $sql = "SELECT * FROM " . $db . " ORDER BY ". $orderBy. " DESC LIMIT :offset, :numElts";
         $req = Database::getBdd()->prepare($sql);
@@ -86,7 +84,7 @@ class HomeManager extends Model
         $req->execute();
         
         $news = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         { 
             $news[] = new Image($data); 
         }

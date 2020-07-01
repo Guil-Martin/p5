@@ -115,11 +115,11 @@ else
     <div class="collapse" id="mod_avatar">
 
         <div class="pt-4">
-            <div class="mx-auto" style="width: 100px; height: 100px;">
-                <img src="<?php echo WEBROOT . 'images/users/' . $User->getAvatar() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
+            <div class="mx-auto avatarPreview">
+                <img src="<?php echo WEBROOT . 'assets/images/users/' . $User->getAvatar() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
             </div>
 
-            <div class="form-group mx-auto" style="width: 300px;">
+            <div class="form-group mx-auto fileUpload">
                 <label for="fileUpload" aria-label="Avatar" title="Avatar"><strong>Avatar</strong> (optionnel) 100px par 100px, l'image sera redimentionée si plus large</label>
                 <input type="file" name="fileUpload" class="form-control-file <?php echo $avatarError ? 'is-invalid' : '' ?>">
                 <?php echo !empty($Errors['avatarFormat']) ? '<div class="invalid-feedback">' . $Errors['avatarFormat'] . '</div>' : '' ?>

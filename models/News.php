@@ -38,9 +38,9 @@ class News
     public function setExcerpt($var)       { $var = (string) $var; $this->_excerpt = $var; }
     public function setNewsContent($var)   { $var = (string) $var; $this->_content = $var; }
     public function setImage($var)         { $var = (string) $var; $this->_image = $var; }
-    public function setViews($var)         { $var = (int) $var; $this->_views = $var; }
-    public function setLikes($var)         { $var = (int) $var; $this->_likes = $var; }
-    public function setComments($var)      { $var = (int) $var; $this->_numComments = $var; }
+    public function setViews($var)         { $var = $var; $this->_views = $var; }
+    public function setLikes($var)         { $var = $var; $this->_likes = $var; }
+    public function setComments($var)      { $var = $var; $this->_numComments = $var; }
     public function setDatePosted($var)    { $this->_datePosted = $var; }
     public function setDateEdited($var)    { $this->_dateEdited = $var; }
     /////////////////////////

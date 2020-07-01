@@ -63,7 +63,7 @@ class GalleryManager extends Model
         $req->execute();
 
         $image = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         { 
             $image[] = new Image($data); 
         }
@@ -78,7 +78,7 @@ class GalleryManager extends Model
         $req->execute();
 
         $image = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         { 
             $image[] = new Image($data); 
         }
@@ -92,7 +92,7 @@ class GalleryManager extends Model
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
-        $num = $req->fetch(PDO::FETCH_ASSOC);
+        $num = $req->fetch();
         return (int) $num['total'];
     }
 

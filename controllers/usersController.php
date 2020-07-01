@@ -1,15 +1,12 @@
 <?php
 
-require_once(ROOT . 'Models/UserManager.php');
-require_once(ROOT . 'Models/User.php');
-
 class usersController extends Controller
 {
 
-    function register()
+    public function register()
     { // treat register form 
 
-        $d = [];
+        $data = [];
 
         if (isset($_POST['uName']))
         {            
@@ -116,10 +113,14 @@ class usersController extends Controller
                 if ($userManager->registerUser($user))
                 { // the user has successfully been registered in the DB
                     
-                    // Connect user
-                    $_SESSION['userName'] = $user->getUserName();
-                    $_SESSION['userContentId'] = $user->getContentId();
-                    $_SESSION['userId'] = $user->getId();
+                    $user = $userManager->getUserInfoBy($user->getContentId(), 'contentId');
+
+                    if (!empty($user)) {
+                        // Connect user
+                        $_SESSION['userName'] = $user->getUserName();
+                        $_SESSION['userContentId'] = $user->getContentId();
+                        $_SESSION['userId'] = $user->getId();
+                    }
 
                     // redirect to personnal page
                     header("Location: " . WEBROOT . "users/page/" . $user->getContentId());
@@ -134,18 +135,18 @@ class usersController extends Controller
             
             $formD = $this->secure_form($formD);
 
-            $d['Data'] = $formD;
-            $d['Errors'] = $errors;
+            $data['Data'] = $formD;
+            $data['Errors'] = $errors;
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("register");
     }
 
-    function login()
+    public function login()
     { // Treat login form
 
-        $d = [];
+        $data = [];
 
         if (isset($_POST["uName"]))
         {
@@ -230,16 +231,16 @@ class usersController extends Controller
             // secure before redisplay in form inputs
             $formD = $this->secure_form($formD);
 
-            $d['Data'] = $formD;
-            $d['Errors'] = $errors;      
+            $data['Data'] = $formD;
+            $data['Errors'] = $errors;      
         }
         
         
-        $this->set($d);
+        $this->set($data);
         $this->render("login");
     }
 
-    function logout()
+    public function logout()
     {
         if (!empty($_SESSION['userName'])) unset($_SESSION['userName']);
         if (!empty($_SESSION['userContentId'])) unset($_SESSION['userContentId']);
@@ -248,34 +249,34 @@ class usersController extends Controller
         header("Location: " . WEBROOT);
     }
     
-    function page(...$data)
+    public function page(...$id)
     {
-        $d = [];
+        $data = [];
 
-        if (!empty($data[0])) 
+        if (!empty($id[0]))
         { // Content ID parameter went trough
           // Secure url input
-            $data[0] = (string) $this->secure_input($data[0]);
+            $id[0] = (string) $this->secure_input($id[0]);
 
             // Get user data if found
             $userManager = new UserManager();
-            $user = $userManager->getUserInfoBy($data[0], 'contentId');
+            $user = $userManager->getUserInfoBy($id[0], 'contentId');
 
             if (!empty($user))
             { // User data found and ready
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user);
+                $data['User'] = $user;
+                $data['Owner'] = $this->isUserPageOwner($user);
             }
             
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("page");
     }
 
-    function profile(...$ids)
+    public function profile(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]))
         {
@@ -288,25 +289,25 @@ class usersController extends Controller
             if (!empty($user)) 
             {
 
-                $d['User'] = $user;       
+                $data['User'] = $user;       
                 
-                $d['NumViewsImg'] = $userManager->getNum($user->getId(), 'views', DB_IMG);
-                $d['NumViewsNews'] = $userManager->getNum($user->getId(), 'views', DB_NEWS);
+                $data['NumViewsImg'] = $this->shortNumber($userManager->getNum($user->getId(), 'views', DB_IMG));
+                $data['NumViewsNews'] = $this->shortNumber($userManager->getNum($user->getId(), 'views', DB_NEWS));
 
-                $d['NumLikesImg'] = $userManager->getNum($user->getId(), 'likes', DB_IMG);
-                $d['NumLikesNews'] = $userManager->getNum($user->getId(), 'likes', DB_NEWS);
+                $data['NumLikesImg'] = $this->shortNumber($userManager->getNum($user->getId(), 'likes', DB_IMG));
+                $data['NumLikesNews'] = $this->shortNumber($userManager->getNum($user->getId(), 'likes', DB_NEWS));
 
             }
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("profile", true);
     }
 
-    function profileEdit(...$id)
+    public function profileEdit(...$id)
     {
 
-        $d = [];
+        $data = [];
         $errors = [];
         $formD = [];
 
@@ -321,8 +322,8 @@ class usersController extends Controller
 
             if (!empty($user)) 
             { // User data found and ready
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user);
+                $data['User'] = $user;
+                $data['Owner'] = $this->isUserPageOwner($user);
 
                 $formD['bio'] = $user->getBio();
 
@@ -404,10 +405,9 @@ class usersController extends Controller
                     }
                     else
                     {
-                        require_once(ROOT . 'Models/SimpleImage.php');                   
                         
                         // Creates user folder if doesn't exist
-                        $target_folder = ROOT . "images/users/" . $user->getContentId() ;
+                        $target_folder = ROOT . "assets/images/users/" . $user->getContentId() ;
                         if (!is_dir($target_folder))
                         { mkdir($target_folder); }
         
@@ -446,7 +446,7 @@ class usersController extends Controller
                         if (!empty($mainAvatar)) 
                         { // Save new avatar images on the server
 
-                            $oldAvatar = ROOT . "images/users/" . $user->getAvatar();
+                            $oldAvatar = ROOT . "assets/images/users/" . $user->getAvatar();
                             if (file_exists($oldAvatar) && !strpos($user->getAvatar(), 'avatarDefault')) {
                                 unlink($oldAvatar);
                             }
@@ -454,18 +454,18 @@ class usersController extends Controller
                         }
 
                         // Will display the button to get back to the member page
-                        $d['Success'] = 'Profile mis à jour avec succès';
+                        $data['Success'] = 'Profile mis à jour avec succès';
                     }
                 }
 
-                $d['Data'] = $formD;
-                $d['Errors'] = $errors;
+                $data['Data'] = $formD;
+                $data['Errors'] = $errors;
 
             }
                 
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("profileEdit", true);
         
     }

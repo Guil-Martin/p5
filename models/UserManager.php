@@ -58,7 +58,7 @@ class UserManager extends Model
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':by', $data, PDO::PARAM_STR);
         $req->execute();
-        $data = $req->fetch(PDO::FETCH_ASSOC);
+        $data = $req->fetch();
         if ($data) 
         { // Data found, hydrate a user object and return it
             $user = new User($data);
@@ -68,13 +68,13 @@ class UserManager extends Model
     }
     ///////
 
-    function getNum($userId, $toCount, $db) 
+    public function getNum($userId, $toCount, $db) 
     {
         $sql = "SELECT SUM(" . $toCount . ") as total FROM " . $db . " WHERE userId = :userId";
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
-        $num = $req->fetch(PDO::FETCH_ASSOC);
+        $num = $req->fetch();
         return (int) $num['total'];
     }
 

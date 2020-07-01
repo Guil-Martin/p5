@@ -37,7 +37,7 @@ else
         <?php echo !empty($Errors['titleLen']) ? '<div class="invalid-feedback">' . $Errors['titleLen'] . '</div>' : '' ?>
     </div>
 
-    <div class="form-group text-center mx-auto" style="width: 300px;">
+    <div class="form-group text-center mx-auto fileUpload">
         <label for="fileUpload" aria-label="Image" title="Image" class="<?php echo $imageError ? 'is-invalid' : '' ?>">Image a poster</label>
         <input type="file" id="image" name="fileUpload" class="form-control-file">
         <?php echo !empty($Errors['imageEmpty']) ? '<div class="invalid-feedback">' . $Errors['imageEmpty'] . '</div>' : '' ?>

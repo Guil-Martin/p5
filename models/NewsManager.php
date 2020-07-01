@@ -57,7 +57,7 @@ class NewsManager extends Model
         $req->execute();
 
         $news = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         { 
             $news[] = new News($data); 
         }
@@ -72,7 +72,7 @@ class NewsManager extends Model
         $req->execute();
 
         $news = [];
-        while ($data = $req->fetch(PDO::FETCH_ASSOC)) 
+        while ($data = $req->fetch()) 
         { 
             $news[] = new News($data); 
         }
@@ -86,7 +86,7 @@ class NewsManager extends Model
         $req = Database::getBdd()->prepare($sql);
         $req->bindValue(':userId', $userId, PDO::PARAM_INT);
         $req->execute();
-        $num = $req->fetch(PDO::FETCH_ASSOC);
+        $num = $req->fetch();
         return (int) $num['total'];
     }
 

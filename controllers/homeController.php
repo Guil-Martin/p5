@@ -1,28 +1,20 @@
 <?php
 
-require_once(ROOT . 'Models/HomeManager.php');
-require_once(ROOT . 'Models/UserManager.php');
-require_once(ROOT . 'Models/User.php');
-require_once(ROOT . 'Models/GalleryManager.php');
-require_once(ROOT . 'Models/Image.php');
-require_once(ROOT . 'Models/NewsManager.php');
-require_once(ROOT . 'Models/News.php');
-
 class homeController extends Controller
 {
 
-    function index(...$data)
+    public function index(...$ids)
     {
-        $d = [];
+        $data = [];
 
 
-        $this->set($d);
+        $this->set($data);
         $this->render("index");
     }
 
-    function posts(...$data)
+    public function posts(...$filters)
     {
-        $d = [];
+        $data = [];
 
         $homeManager = new HomeManager();
 
@@ -31,7 +23,7 @@ class homeController extends Controller
             $userManager = new UserManager();
             $user = $userManager->getUserInfoBy($_SESSION['userId'], 'Id');
             if (!empty($user)) {
-                $d['User'] = $user;
+                $data['User'] = $user;
             }
         }       
 
@@ -47,7 +39,7 @@ class homeController extends Controller
         { // When submit filter button is pressed
 
             $formD = $this->secure_form($_POST);
-            $d['Data'] = $formD;
+            $data['Data'] = $formD;
 
             if ($formD['type'] === "news") {
                 $db = DB_NEWS;
@@ -88,12 +80,12 @@ class homeController extends Controller
             }
         }
       
-        if (!empty($data[0])) 
+        if (!empty($filters[0])) 
         { // Get back filters data if available on pagination button presses
-            $db = $data[0] === 'news' ? DB_NEWS : ($data[0] === 'gallery' ? DB_IMG : $db);
-            if (!empty($data[1])) {
-                $data[1] = (int) $data[1];
-                switch ($data[1]) {
+            $db = $filters[0] === 'news' ? DB_NEWS : ($filters[0] === 'gallery' ? DB_IMG : $db);
+            if (!empty($filters[1])) {
+                $filters[1] = (int) $filters[1];
+                switch ($filters[1]) {
                     case 1:
                         $period = 1; break;
                     case 7:
@@ -105,8 +97,8 @@ class homeController extends Controller
                     default: break;
                 }
             }
-            if (!empty($data[2])) {
-                switch ($data[2]) {
+            if (!empty($filters[2])) {
+                switch ($filters[2]) {
                     case 'views':
                         $number = 'views'; break;
                     case 'likes':
@@ -116,8 +108,8 @@ class homeController extends Controller
                     default: break;
                 }                
             }
-            if (!empty($data[3])) {
-                switch ($data[3]) {
+            if (!empty($filters[3])) {
+                switch ($filters[3]) {
                     case 'recent':
                         $order = 'DESC'; break;
                     default: break;
@@ -128,38 +120,41 @@ class homeController extends Controller
         ///// Pagination
 
         // Get page from page selector form else get it from pagination buttons
-        $page = !empty($_POST['pageSelector']) ? (int) $_POST['pageSelector'] : (!empty($data[4]) ? (int) $data[4] : 1);
+        $page = !empty($_POST['pageSelector']) ? (int) $_POST['pageSelector'] : (!empty($filters[4]) ? (int) $filters[4] : 1);
         
         if ($page < 1) { $page = 1; } // Not valid / 0
 
         $count = $homeManager->numElt($db);               
         $numPerPage = $db == DB_NEWS ? NEWS_PER_PAGE : IMAGES_PER_PAGE; // Number of posts on the page
         $numPages = ceil($count / $numPerPage);
-        $d['NumPages'] = $numPages;
-        $d['CurrentPage'] = 1;
+        $data['NumPages'] = $numPages;
+        $data['CurrentPage'] = 1;
 
         $page = $page > $numPages ? $numPages : $page; // Page max?
-        $d['CurrentPage'] = $page;
+        $data['CurrentPage'] = $page;
         /////
 
         $posts = $homeManager->getFiltered($db, $period, $number, $order, $page);
 
         foreach ($posts as $key => $post) {
             $posts[$key] = $this->secure_form($post);
+            $posts[$key]['likes'] = $this->shortNumber($posts[$key]['likes']);
+            $posts[$key]['comments'] = $this->shortNumber($posts[$key]['comments']);
+            $posts[$key]['views'] = $this->shortNumber($posts[$key]['views']);
         }
 
-        $d['Posts'] = $posts; 
+        $data['Posts'] = $posts; 
 
-        $filters = [];
+        $currfilters = [];
         $db = $db == DB_NEWS ? 'news' : 'gallery';
-        $filters['db'] = $db;
-        $filters['period'] = $period;
-        $filters['number'] = $number;
-        $filters['order'] = $order;
+        $currfilters['db'] = $db;
+        $currfilters['period'] = $period;
+        $currfilters['number'] = $number;
+        $currfilters['order'] = $order;
 
-        $d['Data'] = $filters;
+        $data['Data'] = $currfilters;
 
-        $this->set($d);
+        $this->set($data);
         $this->render("posts", true);
     }
 }

@@ -251,7 +251,6 @@
                 $.ajax ({ 
                     url: cont,
                     success: (output) => {
-                        alert(output)
                         location.reload();
                     },
                     error: (xhr, ajaxOptions, error) => {

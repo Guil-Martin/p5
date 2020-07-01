@@ -1,23 +1,16 @@
 <?php
 
-require_once(ROOT . 'Models/GalleryManager.php');
-require_once(ROOT . 'Models/Image.php');
-require_once(ROOT . 'Models/UserManager.php');
-require_once(ROOT . 'Models/User.php');
-require_once(ROOT . 'Models/CommentManager.php');
-require_once(ROOT . 'Models/Comment.php');
-
 class galleryController extends Controller
 {
 
-    function galleryCreate(...$data)
+    public function galleryCreate(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
-        if (!empty($data[0]))
+        if (!empty($ids[0]))
         { // User ID parameter went trough
           // Secure url input
-            $userId = (int) $data[0];
+            $userId = (int) $ids[0];
 
             $userManager = new UserManager();
             $user = $userManager->getUserInfoBy($userId, 'Id');
@@ -26,11 +19,11 @@ class galleryController extends Controller
             {
 
                 $validUser = $this->isUserPageOwner($user);
-                $d['Owner'] = $validUser;
+                $data['Owner'] = $validUser;
 
                 if ($validUser) {
 
-                    $d['User'] = $user;
+                    $data['User'] = $user;
                     
                     if (isset($_POST["postTitle"]))
                     {                
@@ -64,7 +57,6 @@ class galleryController extends Controller
                         }
 
                         //// IMAGE
-                        require_once(ROOT . 'Models/SimpleImage.php');
                         if (empty($_FILES['fileUpload']['name'])) {
                             $errors['imageEmpty'] = 'Veuillez séléctionner une image à uploader'; 
                         }
@@ -88,7 +80,7 @@ class galleryController extends Controller
                             { //// IMAGE
                                 $imageThumb = new SimpleImage();
                                 // Creates user folder if doesn't exist
-                                $target_folder = ROOT . "images/gallery/" . $user->getContentId();
+                                $target_folder = ROOT . "assets/images/gallery/" . $user->getContentId();
                                 if (!is_dir($target_folder))
                                 { mkdir($target_folder); }
                                 
@@ -139,27 +131,27 @@ class galleryController extends Controller
 
                             if ($galleryManager->galleryCreate($image))
                             { // Should succeed if userId valid
-                                $d['Success'] = 'Image postée avec succès';
+                                $data['Success'] = 'Image postée avec succès';
                                 $imageThumb->save($thumb_file);                               
                                 $imageMain->save($target_file);                            
                             }
 
                         }
 
-                        $d['Data'] = $formD;
-                        $d['Errors'] = $errors;
+                        $data['Data'] = $formD;
+                        $data['Errors'] = $errors;
                     }
                 }
             }
         }
         
-        $this->set($d);
+        $this->set($data);
         $this->render("galleryCreate", true);
     }
 
-    function galleryEdit(...$ids)
+    public function galleryEdit(...$ids)
     { // AJAX
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -171,10 +163,10 @@ class galleryController extends Controller
 
             if (!empty($user))
             {
-                $d['User'] = $user;
+                $data['User'] = $user;
 
                 $validUser = $this->isUserPageOwner($user);
-                $d['Owner'] = $validUser;
+                $data['Owner'] = $validUser;
                 
                 if ($validUser) {
 
@@ -185,7 +177,7 @@ class galleryController extends Controller
                     if (!empty($image[0])) {
                         $image = $image[0];
 
-                        $d['Image'] = $image;
+                        $data['Image'] = $image;
 
                         $formD['author'] = $image->getAuthor();
                         $formD['title'] = $image->getImgTitle();
@@ -193,8 +185,8 @@ class galleryController extends Controller
                         $formD['userId'] = $image->getId();
                         $formD['dateEdited'] = $image->getDateEdited();
 
-                        $oldImage = ROOT . "images/gallery/" . $image->getImgPath();
-                        $oldImageThumbnail = ROOT . "images/gallery/" . $image->getImgThumbnail();
+                        $oldImage = ROOT . "assets/gallery/" . $image->getImgPath();
+                        $oldImageThumbnail = ROOT . "assets/images/gallery/" . $image->getImgThumbnail();
 
                     }
 
@@ -244,12 +236,11 @@ class galleryController extends Controller
 
                         if (!empty($file))
                         { //// IMAGE
-                            require_once(ROOT . 'Models/SimpleImage.php');
-                           
+
                             $imageThumb = new SimpleImage();
                             
                             // Creates user folder if doesn't exist
-                            $target_folder = ROOT . "images/gallery/" . $user->getContentId();
+                            $target_folder = ROOT . "assets/images/gallery/" . $user->getContentId();
                             if (!is_dir($target_folder))
                             { mkdir($target_folder); }
                             
@@ -304,7 +295,7 @@ class galleryController extends Controller
 
                             if ($galleryManager->galleryUpdate($image))
                             { // Should succeed if userId valid
-                                $d['Success'] = 'Image mise à jour avec succès';
+                                $data['Success'] = 'Image mise à jour avec succès';
 
                                 if (!empty($imageMain)) 
                                 { // Save new images on the server and delete the old ones
@@ -321,28 +312,28 @@ class galleryController extends Controller
                             }
                         }
                         
-                        $d['Errors'] = $errors;
+                        $data['Errors'] = $errors;
                     }
 
                     $formD = $this->secure_form($formD);                    
-                    $d['Data'] = $formD;
+                    $data['Data'] = $formD;
                 }
             }
         }
         
-        $this->set($d);
+        $this->set($data);
         $this->render("galleryEdit", true);
     }
 
-    function gallery(...$data)
+    public function gallery(...$ids)
     { // AJAX
 
-        $d = [];
+        $data = [];
 
-        if (!empty($data[0]))
+        if (!empty($ids[0]))
         { // User ID parameter went trough
           // Secure url input
-            $userId = (int) $data[0];
+            $userId = (int) $ids[0];
 
             // Get user data if found
             $userManager = new UserManager();
@@ -353,37 +344,44 @@ class galleryController extends Controller
                 $galleryManager = new GalleryManager();
 
                 // Pagination
-                $page = !empty($data[1]) ? (int) $data[1] : 1;
+                $page = !empty($ids[1]) ? (int) $ids[1] : 1;
                 if ($page < 1) { $page = 1; } // Not valid / 0
 
                 $count = $galleryManager->numElt($userId);               
                 $numPerPage = IMAGES_PER_PAGE; // Number of posts on the page
                 $numPages = ceil($count / $numPerPage);
-                $d['NumPages'] = $numPages;
-                $d['CurrentPage'] = 1;
+                $data['NumPages'] = $numPages;
+                $data['CurrentPage'] = 1;
 
                 $page = $page > $numPages ? $numPages : $page; // Page max?
-                $d['CurrentPage'] = $page;
+                $data['CurrentPage'] = $page;
 
                 $images = $galleryManager->getGallery($user->getId(), $page);
                
+                foreach ($images as $key => $value) 
+                { // Compact numbers
+                    $images[$key]->setComments($this->shortNumber($images[$key]->getComments()));
+                    $images[$key]->setLikes($this->shortNumber($images[$key]->getLikes()));
+                    $images[$key]->setViews($this->shortNumber($images[$key]->getViews()));
+                }
+
                 if (!empty($images)) 
                 { // User data found and ready
-                    $d['Images'] = $images;
+                    $data['Images'] = $images;
                 }
-                $d['User'] = $user;
-                $d['Owner'] = $this->isUserPageOwner($user);
+                $data['User'] = $user;
+                $data['Owner'] = $this->isUserPageOwner($user);
             }
-        }
+        }        
 
-        $this->set($d);
+        $this->set($data);
         $this->render("gallery", true);
     }
 
-    function gallerySingle(...$ids)
+    public function gallerySingle(...$ids)
     { // AJAX    
 
-        $d = [];
+        $data = [];
 
         if (!empty($ids[0]))
         { // Image ID parameter went trough
@@ -405,26 +403,31 @@ class galleryController extends Controller
                 //$image->setImgContent($this->secure_input($image->getImgContent()));
                 //$image->setImgContent($this->ParseBBCode($image->getImgContent()));
 
+                // Compact numbers
+                $image->setComments($this->shortNumber($image->getComments()));
+                $image->setLikes($this->shortNumber($image->getLikes()));
+                $image->setViews($this->shortNumber($image->getViews()));
+
                 // Get author user data
                 $author = $userManager->getUserInfoBy($image->getUserId(), 'id');
                 
                 if (!empty($author))
                 { // Author data found
-                    $d['Author'] = $author;
-                    $d['Image'] = $image;                    
+                    $data['Author'] = $author;
+                    $data['Image'] = $image;                    
 
                     $commentManager = new CommentManager();
 
                     if (CONNECTED) 
                     { // Get user data if connected
 
-                        $d['Owner'] = $this->isUserPageOwner($author);
+                        $data['Owner'] = $this->isUserPageOwner($author);
 
                         $user = $userManager->getUserInfoBy($_SESSION['userId'], 'id');
                         if (!empty($user))
                         {
-                            $d['User'] = $user;
-                            $d['ImageLiked'] = $galleryManager->liked($image->getId(), $user->getId());
+                            $data['User'] = $user;
+                            $data['ImageLiked'] = $galleryManager->liked($image->getId(), $user->getId());
                             
                             ///// Form comment
                             if (isset($_POST['msgContent']))
@@ -461,9 +464,9 @@ class galleryController extends Controller
                                         $galleryManager->addOne($image->getId(), 'comments');
                                     }
                                 }
-
-                                $d['Data'] = $formD;
-                                $d['Errors'] = $errors;
+                                
+                                $data['Data'] = $formD;
+                                $data['Errors'] = $errors;
 
                             }
                             /////
@@ -483,19 +486,20 @@ class galleryController extends Controller
                         foreach ($comments as $key => $com) {
                             // Secure data
                             $comments[$key]['commentContent'] = $this->secure_input($com['commentContent']);
+                            $comments[$key]['likes'] = $this->shortNumber($comments[$key]['likes']);
                         }
-                        $d['Comments'] = $comments;
+                        $data['Comments'] = $comments;
                     }
 
                 }
             }
         }
 
-        $this->set($d);
+        $this->set($data);
         $this->render("gallerySingle", true);
     }
 
-    function likeImage(...$ids)
+    public function likeImage(...$ids)
     { // AJAX
         if (CONNECTED) 
         { // Check if connected and if the id correspond to the session variable
@@ -519,7 +523,7 @@ class galleryController extends Controller
         }        
     }
 
-    function delPost(...$ids)
+    public function delPost(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -536,8 +540,8 @@ class galleryController extends Controller
                 if (!empty($image[0])) {
                     if ($galleryManager->deleteImage($imgId))
                     { // Delete images linked to this post
-                        $target_file = ROOT . "images/gallery/" . $image[0]->getImgPath();
-                        $thumb_file = ROOT . "images/gallery/" . $image[0]->getImgThumbnail();
+                        $target_file = ROOT . "assets/images/gallery/" . $image[0]->getImgPath();
+                        $thumb_file = ROOT . "assets/images/gallery/" . $image[0]->getImgThumbnail();
                         if (file_exists($target_file)) {
                             unlink($target_file);
                         }
@@ -551,7 +555,7 @@ class galleryController extends Controller
     }
 
     ///// Comment
-    function likeComment(...$ids)
+    public function likeComment(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {
@@ -570,7 +574,7 @@ class galleryController extends Controller
         }    
     }
 
-    function delComment(...$ids)
+    public function delComment(...$ids)
     { // AJAX
         if (!empty($ids[0]) && !empty($ids[1]))
         {

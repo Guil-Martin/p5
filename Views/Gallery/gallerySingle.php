@@ -2,27 +2,18 @@
 
 <?php 
 
-function shortNumber($num) 
-{
-    $units = ['', 'K', 'M', 'B', 'T'];
-    for ($i = 0; $num >= 1000; $i++) {
-        $num /= 1000;
-    }
-    return round($num, 1) . $units[$i];
-}
-
 $commentContentError = !empty($Errors['commentContentEmpty']) || !empty($Errors['commentContentLen']);
 
 if (!empty($Image)) {
 ?>
     <div class = "row">
-        <img class="col-md-12 p-0" src="<?php echo WEBROOT . 'images/gallery/' . $Image->getImgPath() ?>" alt="<?php $Image->getImgTitle() ?>">
+        <img class="col-md-12 p-0" src="<?php echo WEBROOT . 'assets/images/gallery/' . $Image->getImgPath() ?>" alt="<?php $Image->getImgTitle() ?>">
     </div>
            
     <div class = "row border-bottom border-light">
         <div class = "col text-center mt-3 mb-3">
             <div class="">
-                <img width="25" height="25" src="<?php echo WEBROOT . 'images/users/' . $Author->getAvatar() ?>" alt="<?php echo $Author->getUserName() ?>" class="img-fluid">
+                <img width="25" height="25" src="<?php echo WEBROOT . 'assets/images/users/' . $Author->getAvatar() ?>" alt="<?php echo $Author->getUserName() ?>" class="img-fluid">
                 <small>Posté par : <a href="<?php echo WEBROOT . 'users/page/' . $Author->getContentId() ?>"><?php echo $Author->getUserName() ?></a></small>
             </div>            
             <small class="">Posté le <?php echo date("d/m/Y à H:i", strtotime($Image->getDatePosted())) ?></small>
@@ -50,7 +41,7 @@ if (!empty($Image)) {
                             <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                             </svg>
                         </span>
-                        <span class="pr-2 pl-1"><?php echo shortNumber($Image->getLikes()) ?></span>
+                        <span class="pr-2 pl-1"><?php echo $Image->getLikes() ?></span>
                     
 
                     <?php
@@ -167,18 +158,18 @@ if (!empty($Image)) {
             <div class="commentBox border border-light bg-dark p-2 mt-2">
 
                 <div class="userName">
-                    <img width="25px" height="25px" src="<?php echo WEBROOT . 'images/users/' . $com["avatar"] ?>" alt="<?php echo $com["userName"] ?>" class="img-fluid">
+                    <img width="25px" height="25px" src="<?php echo WEBROOT . 'assets/images/users/' . $com["avatar"] ?>" alt="<?php echo $com["userName"] ?>" class="img-fluid">
                     <a class="pl-2" href="<?php echo WEBROOT . 'users/page/' . $com['contentId'] ?>" class="href">
                     <?php echo $com["userName"] ?>
                     </a>
                     <div class=""><small>Posté le <?php echo date("d/m/Y à H:i", strtotime($com['datePosted'])) ?></small></div>
                 </div>                 
 
-                <div class="pl-2 mt-2" style="white-space: pre-wrap;"><?php echo $com['commentContent'] ?></div>
+                <div class="pl-2 mt-2 commentContent"><?php echo $com['commentContent'] ?></div>
 
                 <div class="d-flex mt-2">
                     <div class="ml-auto">
-                        <div class="buttons" style="align-items: center;">
+                        <div class="buttons">
 
                             <div class="">
                                 <span>
@@ -186,7 +177,7 @@ if (!empty($Image)) {
                                     <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                                     </svg>
                                 </span>
-                                <span class="pr-2 pl-1"><?php echo shortNumber($com['likes']) ?></span>
+                                <span class="pr-2 pl-1"><?php echo $com['likes'] ?></span>
 
                             <?php
                             if (!empty($User)) {

@@ -3,13 +3,12 @@
 class Database
 {
 	private static $bdd = null;
-	
-	public function __construct() {}
 
 	public static function getBdd() {
 		if (!isset(self::$bdd)) {
 			try { 
-				self::$bdd = new PDO('mysql:host='.ADB_HOST.';dbname='.ADB_NAME.';charset=utf8', ADB_USER, ADB_PASS);
+				self::$bdd = new PDO(ADB_HOST, ADB_USER, ADB_PASS);
+				self::$bdd->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 			} 
 			catch (PDOExeption $e) { echo $e; }
 		}

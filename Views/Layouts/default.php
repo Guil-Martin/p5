@@ -2,7 +2,7 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="fr"> <!--<![endif]-->
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,12 +23,12 @@
 	<meta name="twitter:url" content="" />
 	<meta name="twitter:card" content="" />
 
-	<link rel="shortcut icon" href="<?php echo WEBROOT ?>favicon.png">
+	<link rel="shortcut icon" href="<?php echo WEBROOT ?>assets/favicon/favicon.png">
 
 	<!-- Bootstrap -->
-	<link rel="stylesheet" href="<?php echo WEBROOT ?>css/bootstrap.css">
+	<link rel="stylesheet" href="<?php echo WEBROOT ?>assets/css/bootstrap.css">
 	
-	<link rel="stylesheet" href="<?php echo WEBROOT ?>css/style.css">
+	<link rel="stylesheet" href="<?php echo WEBROOT ?>assets/css/style.css">
 
 	</head>
 	<body>
@@ -94,7 +94,7 @@
 
 		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-xl" role="document">
-				<div class="modal-content" style="background-color: black;">
+				<div class="modal-content">
 
 					<div class="modal-header">
 						<h4 class="modal-title w-100" id="myModalLabel"></h4>
@@ -124,13 +124,13 @@
 	</div>
 	
 	<!-- jQuery -->
-	<script src="<?php echo WEBROOT ?>js/jquery.min.js"></script>
+	<script src="<?php echo WEBROOT ?>assets/js/jquery.min.js"></script>
 	<!-- Bootstrap -->
-	<script src="<?php echo WEBROOT ?>js/bootstrap.min.js"></script>
+	<script src="<?php echo WEBROOT ?>assets/js/bootstrap.min.js"></script>
 	<!-- Main JS -->
-	<script src="<?php echo WEBROOT ?>js/main.js"></script>
+	<script src="<?php echo WEBROOT ?>assets/js/main.js"></script>
 	<!-- Tinymce -->
-	<script src="https://cdn.tiny.cloud/1/1jvbu1nyy3wtq3lmicqy92cn8205iug5b3lroymocjyc2kgz/tinymce/5/tinymce.min.js" referrerpolicy="origin"/></script>
+	<script src="https://cdn.tiny.cloud/1/174jf85zpov9rbn2319xj4d1df7zegfj9wfg3g1ecfmdkq1h/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 
 	</body>
 </html>

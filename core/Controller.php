@@ -4,12 +4,12 @@
         var $vars = [];
         var $layout = "default";
 
-        function set($d)
+        public function set($data)
         {
-            $this->vars = array_merge($this->vars, $d);
+            $this->vars = array_merge($this->vars, $data);
         }
 
-        function render($filename, $contentOnly = false)
+        public function render($filename, $contentOnly = false)
         {
             $view = ROOT . "Views/" . ucfirst(str_replace('Controller', '', get_class($this))) . '/' . $filename . '.php';
             if (file_exists($view))
@@ -20,7 +20,6 @@
                 $content_for_layout = ob_get_clean();
 
                 if ($contentOnly) {
-                    //echo json_encode($content_for_layout);
                     echo $content_for_layout;
                 } else {
                     require_once(ROOT . "Views/Layouts/" . $this->layout . '.php');
@@ -52,7 +51,7 @@
             return $valid;
         }
 
-        protected function secure_form($form)
+        public function secure_form($form)
         { // Secure array of string values
             foreach ($form as $key => $value)
             {
@@ -61,7 +60,7 @@
             return $form;
         }
 
-        protected function secure_input($data)
+        public function secure_input($data)
         {
             $data = trim($data);
             $data = stripslashes($data);
@@ -69,7 +68,7 @@
             return $data;
         }
 
-        protected function urlValidId($str)
+        public function urlValidId($str)
         {
             return preg_replace("/[^A-Za-z0-9]/", "_", $str);
         }
@@ -78,7 +77,7 @@
          * @param  String $str The input string
          * @return String      The string without accents
          */
-        function removeAccents($str)
+        public function removeAccents($str)
         {
             $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð',
                 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã',
@@ -107,12 +106,21 @@
             return str_replace($a, $b, $str);
         }
 
+        public function shortNumber($num)
+        {
+            $units = ['', 'K', 'M', 'B', 'T'];
+            for ($i = 0; $num >= 1000; $i++) {
+                $num /= 1000;
+            }
+            return round($num, 1) . $units[$i];
+        }
+
         /**
          * @param  String $str The input string
          * @return String      The URL-friendly string (lower-cased, accent-stripped,
          *                     spaces to dashes).
          */
-        function toURLFriendly($str)
+        public function toURLFriendly($str)
         {
             $str = removeAccents($str);
             $str = preg_replace(array('/[^a-zA-Z0-9 \'-]/', '/[ -\']+/', '/^-|-$/'), array('', '-', ''), $str);
@@ -135,7 +143,7 @@
         * @return        String                        The parsed string
         */
 
-        function ParseBBCode(string $string): string
+        public function ParseBBCode(string $string): string
         {
             $string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8', true);
             $string = str_replace(["\r\n", "\n"], "\r", $string);

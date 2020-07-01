@@ -1,9 +1,7 @@
 <h2 class="text-center">Modifier une image</h2>
 <?php
 
-if (!empty($Owner)) {
-
-
+if (!empty($Owner)) :
 
 if (!empty($Data['dateEdited']))
 { ?>
@@ -52,11 +50,11 @@ else
     </div>
 
 
-    <div class="mx-auto text-center" style="width: 150px; height: 150px;">
-        <img style="max-height: 100%;" src="<?php echo WEBROOT . 'images/gallery/' . $Image->getImgPath() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
+    <div class="mx-auto text-center oldImage"></div>
+        <img src="<?php echo WEBROOT . 'assets/images/gallery/' . $Image->getImgPath() ?>" alt="<?php $User->getUserName() ?>" class="img-fluid">
     </div>
 
-    <div class="form-group text-center mx-auto" style="width: 300px;">
+    <div class="form-group text-center mx-auto fileUpload">
         <label for="fileUpload" aria-label="Image" title="Image" class="<?php echo $imageError ? 'is-invalid' : '' ?>">Image a poster</label>
         <input type="file" id="image" name="fileUpload" class="form-control-file">
         <?php echo !empty($Errors['imageEmpty']) ? '<div class="invalid-feedback">' . $Errors['imageEmpty'] . '</div>' : '' ?>
@@ -88,5 +86,5 @@ else
 <?php
 }
 
-}
+endif;
 ?>
